@@ -7,12 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ChannelAuditReport } from "@/lib/youtube";
 
 interface LandingHeroProps {
+  featuredCreator: ChannelAuditReport | null;
+  sampleCreators: ChannelAuditReport[];
   onAudit: (query: string) => void;
 }
 
-export function LandingHero({ onAudit }: LandingHeroProps) {
+export function LandingHero({ featuredCreator, sampleCreators, onAudit }: LandingHeroProps) {
   const [query, setQuery] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
@@ -22,12 +25,23 @@ export function LandingHero({ onAudit }: LandingHeroProps) {
     }
   };
 
-  const sampleAudits = [
-    { id: 1, name: "Apple Vision Pro", rank: "#2 Performer", image: "/apple-vision.jpg" },
-    { id: 2, name: "My Desktop Setup", rank: "#3 Performer", image: "/desktop-setup.jpg" },
-    { id: 3, name: "The Best Phone", rank: "#4 Performer", image: "/best-phone.jpg" },
-    { id: 4, name: "How I Edit", rank: "#5 Performer", image: "/edit-process.jpg" },
-  ];
+  const displayCreator = featuredCreator || {
+    channelName: "MKBHD",
+    subscribers: 18500000,
+    thumbnail: "https://yt3.googleusercontent.com/1-7_88_BvC6Y-U_S8_1_S_1-7_88_BvC6Y-U_S8_1_S_1-7_88_BvC6Y-U_S8_1_S_1-7_88_BvC6Y-U_S8_1_S",
+    kpis: {
+      totalViewsLast30Days: 3800000000,
+      avgEngagementRate: 8.2,
+      status: "Growth"
+    },
+    videos: [
+      {
+        title: "MKBHD: The Future of Spatial Computing Analysis",
+        viewCount: 2400000,
+        publishedAt: new Date().toISOString()
+      }
+    ]
+  };
 
   return (
     <div className="relative min-h-screen bg-white overflow-hidden flex flex-col">
@@ -55,10 +69,10 @@ export function LandingHero({ onAudit }: LandingHeroProps) {
             <div className="space-y-8 max-w-md">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
-                  <img src="https://yt3.googleusercontent.com/1-7_88_BvC6Y-U_S8_1_S_1-7_88_BvC6Y-U_S8_1_S_1-7_88_BvC6Y-U_S8_1_S_1-7_88_BvC6Y-U_S8_1_S" alt="MKBHD" className="w-full h-full object-cover" />
+                  <img src={displayCreator.thumbnail} alt={displayCreator.channelName} className="w-full h-full object-cover" />
                 </div>
                 <div>
-                  <h3 className="font-heading text-xl">MKBHD</h3>
+                  <h3 className="font-heading text-xl">{displayCreator.channelName}</h3>
                   <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Primary Benchmark</p>
                 </div>
               </div>
@@ -66,19 +80,19 @@ export function LandingHero({ onAudit }: LandingHeroProps) {
               <div className="grid grid-cols-2 gap-y-8 gap-x-12">
                 <div className="space-y-1">
                   <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Subscribers</p>
-                  <p className="text-2xl font-heading">18.5<span className="text-lg ml-0.5">M</span></p>
+                  <p className="text-2xl font-heading">{(displayCreator.subscribers / 1000000).toFixed(1)}<span className="text-lg ml-0.5">M</span></p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Total Views</p>
-                  <p className="text-2xl font-heading">3.8<span className="text-lg ml-0.5">B</span></p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">30D Views</p>
+                  <p className="text-2xl font-heading">{(displayCreator.kpis.totalViewsLast30Days / 1000000).toFixed(1)}<span className="text-lg ml-0.5">M</span></p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Avg Rating</p>
-                  <p className="text-2xl font-heading">98<span className="text-lg ml-0.5">%</span></p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Avg Engagement</p>
+                  <p className="text-2xl font-heading">{displayCreator.kpis.avgEngagementRate.toFixed(1)}<span className="text-lg ml-0.5">%</span></p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Upload Freq</p>
-                  <p className="text-2xl font-heading">3.2<span className="text-lg ml-0.5">/wk</span></p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Status</p>
+                  <p className="text-2xl font-heading text-indigo-600">{displayCreator.kpis.status}</p>
                 </div>
               </div>
             </div>
@@ -116,7 +130,7 @@ export function LandingHero({ onAudit }: LandingHeroProps) {
               <div className="col-span-2 space-y-6">
                 <Card className="relative aspect-[16/10] overflow-hidden rounded-3xl border-none shadow-2xl shadow-indigo-500/10 group">
                   <img 
-                    src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop" 
+                    src={displayCreator.videos[0]?.thumbnail || "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop"} 
                     alt="Featured analysis" 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                   />
@@ -124,7 +138,7 @@ export function LandingHero({ onAudit }: LandingHeroProps) {
                   
                   <div className="absolute top-4 right-4">
                     <Badge className="bg-white/10 backdrop-blur-md border-white/20 text-white font-heading italic px-4 py-1.5 rounded-full">
-                      Crushing It
+                      Trending
                     </Badge>
                   </div>
 
@@ -144,17 +158,17 @@ export function LandingHero({ onAudit }: LandingHeroProps) {
 
                 <div className="space-y-4">
                   <span className="text-[10px] font-bold tracking-[0.3em] text-indigo-600 uppercase">Featured Performance</span>
-                  <h2 className="text-4xl font-heading leading-tight max-w-md">
-                    MKBHD: The Future of Spatial Computing Analysis
+                  <h2 className="text-4xl font-heading leading-tight max-w-md truncate">
+                    {displayCreator.videos[0]?.title}
                   </h2>
                   <div className="flex items-center gap-6 text-[11px] text-muted-foreground font-medium uppercase tracking-widest">
                     <div className="flex items-center gap-2">
                       <Eye className="w-3.5 h-3.5" />
-                      2.4M Views
+                      {(displayCreator.videos[0]?.viewCount / 1000000).toFixed(1)}M Views
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock className="w-3.5 h-3.5" />
-                      14:22 Duration
+                      {new Date(displayCreator.videos[0]?.publishedAt).toLocaleDateString()}
                     </div>
                   </div>
                 </div>
@@ -162,38 +176,36 @@ export function LandingHero({ onAudit }: LandingHeroProps) {
 
               {/* Mini Metrics Cards */}
               <div className="space-y-6">
-                <Card className="p-6 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 space-y-4">
+                <Card className="p-6 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 space-y-4 bg-white">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Engagement Velocity</span>
+                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Engagement</span>
                     <Zap className="w-4 h-4 text-indigo-600 fill-indigo-600" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-4xl font-heading">8.2<span className="text-2xl ml-0.5">%</span></p>
+                    <p className="text-4xl font-heading">{displayCreator.kpis.avgEngagementRate.toFixed(1)}<span className="text-2xl ml-0.5">%</span></p>
                     <p className="text-[11px] font-bold text-emerald-500 flex items-center gap-1">
                       +0.4 <TrendingUp className="w-3 h-3" />
                     </p>
                   </div>
                   <div className="h-12 w-full mt-4 bg-indigo-50/50 rounded-lg overflow-hidden relative">
-                    {/* SVG Sparkline Placeholder */}
                     <svg viewBox="0 0 100 40" className="absolute inset-0 w-full h-full">
                       <path d="M0 35 Q 20 35, 40 25 T 80 15 T 100 5" fill="none" stroke="rgb(79 70 229)" strokeWidth="2" />
                     </svg>
                   </div>
                 </Card>
 
-                <Card className="p-6 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 space-y-4">
+                <Card className="p-6 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 space-y-4 bg-white">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Monthly Growth</span>
+                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">30D Growth</span>
                     <TrendingUp className="w-4 h-4 text-indigo-600" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-4xl font-heading">+45<span className="text-2xl ml-0.5">%</span></p>
+                    <p className="text-4xl font-heading">+{displayCreator.kpis.viewGrowthPercent}%</p>
                     <p className="text-[11px] font-bold text-indigo-500 flex items-center gap-1">
                       Peak
                     </p>
                   </div>
                   <div className="h-12 w-full mt-4 bg-indigo-50/50 rounded-lg overflow-hidden relative">
-                    {/* SVG Sparkline Placeholder */}
                     <svg viewBox="0 0 100 40" className="absolute inset-0 w-full h-full">
                       <path d="M0 35 Q 20 20, 40 25 T 80 10 T 100 5" fill="none" stroke="rgb(79 70 229)" strokeWidth="2" />
                     </svg>
@@ -204,18 +216,19 @@ export function LandingHero({ onAudit }: LandingHeroProps) {
 
             {/* Bottom Row Sample Cards */}
             <div className="grid grid-cols-4 gap-4">
-              {sampleAudits.map((item) => (
+              {sampleCreators.map((creator, i) => (
                 <motion.div 
-                  key={item.id}
+                  key={creator.channelId}
                   whileHover={{ scale: 1.02, y: -2 }}
+                  onClick={() => onAudit(creator.channelId)}
                   className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 hover:bg-white hover:shadow-xl hover:shadow-indigo-500/5 transition-all cursor-pointer group"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-slate-200 overflow-hidden flex-shrink-0 grayscale group-hover:grayscale-0 transition-all">
-                    <ThumbsUp className="w-full h-full p-3 text-slate-400" />
+                  <div className="w-12 h-12 rounded-xl bg-slate-200 overflow-hidden flex-shrink-0 group-hover:grayscale-0 transition-all">
+                    <img src={creator.thumbnail} alt={creator.channelName} className="w-full h-full object-cover" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[9px] font-bold text-indigo-600 uppercase tracking-widest truncate">{item.rank}</p>
-                    <p className="text-[11px] font-bold text-foreground truncate">{item.name}</p>
+                    <p className="text-[9px] font-bold text-indigo-600 uppercase tracking-widest truncate">#{i + 2} Performer</p>
+                    <p className="text-[11px] font-bold text-foreground truncate">{creator.channelName}</p>
                   </div>
                 </motion.div>
               ))}
@@ -240,3 +253,5 @@ export function LandingHero({ onAudit }: LandingHeroProps) {
     </div>
   );
 }
+
+const cn = (...classes: any[]) => classes.filter(Boolean).join(" ");
