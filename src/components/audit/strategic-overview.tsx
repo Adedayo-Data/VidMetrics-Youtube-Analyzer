@@ -140,7 +140,7 @@ export function StrategicOverview({ report, onVideoSelect, onGenerateReport }: S
           <div className="space-y-1">
             <span className="text-[10px] font-bold tracking-[0.2em] text-indigo-600 uppercase">Quarterly Analysis Report</span>
             <div className="flex items-center gap-4">
-              <h1 className="text-4xl font-heading text-slate-900">{report.channelName} Audit 2024</h1>
+              <h1 className="text-4xl font-heading text-slate-900">{report.channelName} Audit 2026</h1>
               <div className="flex bg-slate-200/50 p-1 rounded-2xl print:hidden">
                 {(["all", "long", "shorts"] as const).map((type) => (
                   <Button

@@ -72,17 +72,32 @@ export function Sidebar({ showExport, activeTab, onTabChange }: SidebarProps) {
       <div className="mt-auto space-y-2 border-t border-border/40 pt-6 print:hidden">
         {showExport && (
           <Button 
-            onClick={() => onTabChange("reports")}
+            onClick={() => {
+              if (activeTab === "reports") {
+                window.print();
+              } else {
+                onTabChange("reports");
+              }
+            }}
             variant="ghost" 
             className="w-full justify-start gap-3 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-50/50 h-11 px-4 rounded-xl transition-all"
           >
             <Download className="w-4 h-4" />
-            <span className="text-[10px] font-bold tracking-widest uppercase">EXPORT PDF</span>
+            <span className="text-[10px] font-bold tracking-widest uppercase">
+              {activeTab === "reports" ? "Print PDF" : "EXPORT PDF"}
+            </span>
           </Button>
         )}
-        <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground text-xs font-medium px-3">
+        <Button 
+          onClick={() => onTabChange("knowledge")}
+          variant="ghost" 
+          className={cn(
+            "w-full justify-start gap-3 h-11 px-4 rounded-xl transition-all",
+            activeTab === "knowledge" ? "text-indigo-600 bg-indigo-50/50" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+          )}
+        >
           <HelpCircle className="w-4 h-4" />
-          HELP CENTER
+          <span className="text-[10px] font-bold tracking-widest uppercase">HELP CENTER</span>
         </Button>
         <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground text-xs font-medium px-3">
           <LogOut className="w-4 h-4" />

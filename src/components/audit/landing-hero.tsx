@@ -243,7 +243,7 @@ export function LandingHero({ featuredCreator, sampleCreators, onAudit }: Landin
           <span className="font-heading text-xl">VidMetrics</span>
           <span className="text-[10px] text-muted-foreground uppercase tracking-widest">Editorial Dashboard</span>
         </div>
-        <p className="text-[10px] text-muted-foreground">© 2024 VidMetrics Editorial. All rights reserved.</p>
+        <p className="text-[10px] text-muted-foreground">© 2026 VidMetrics Editorial. All rights reserved.</p>
         <div className="flex items-center gap-6 text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
           <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
           <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>

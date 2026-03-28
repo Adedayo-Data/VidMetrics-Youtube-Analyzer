@@ -45,9 +45,10 @@ import { calculatePerformanceRatio, calculateEngagementRate, ChannelAuditReport,
 interface IntelligenceHubProps {
   video: VideoAudit | null;
   report: ChannelAuditReport;
+  onViewReport?: () => void;
 }
 
-export function IntelligenceHub({ video, report }: IntelligenceHubProps) {
+export function IntelligenceHub({ video, report, onViewReport }: IntelligenceHubProps) {
   const [activeSubTab, setActiveSubTab] = useState("overview");
   
   // Default to #1 video if none selected
@@ -154,7 +155,11 @@ export function IntelligenceHub({ video, report }: IntelligenceHubProps) {
                             ? "Consider a thumbnail/title refresh. The engagement delta is positive, suggesting the content is good but the 'hook' is failing to convert impressions."
                             : "Maintain current strategy. This video serves as a solid baseline for your core audience retention."}
                         </p>
-                        <Button variant="outline" className="border-indigo-500/30 text-white hover:bg-indigo-500/10 rounded-xl h-10 px-6 text-[10px] font-bold tracking-widest uppercase">
+                        <Button 
+                          onClick={onViewReport}
+                          variant="outline" 
+                          className="border-indigo-500/30 text-white hover:bg-indigo-50/50 rounded-xl h-10 px-6 text-[10px] font-bold tracking-widest uppercase transition-colors"
+                        >
                           View Roadmap
                         </Button>
                       </div>

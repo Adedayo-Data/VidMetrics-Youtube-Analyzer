@@ -6,6 +6,7 @@ import { LandingHero } from "@/components/audit/landing-hero";
 import { StrategicOverview } from "@/components/audit/strategic-overview";
 import { IntelligenceHub } from "@/components/audit/intelligence-hub";
 import { AuditReport } from "@/components/audit/audit-report";
+import { KnowledgeBank } from "@/components/audit/knowledge-bank";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
@@ -178,12 +179,19 @@ export default function Home() {
                   onGenerateReport={() => setActiveTab("reports")}
                 />
               )}
-              {activeTab === "intelligence" && (
-                <IntelligenceHub video={selectedVideo} report={currentReport} />
+              {activeTab === "intelligence" && currentReport && (
+                <IntelligenceHub 
+                  video={selectedVideo} 
+                  report={currentReport} 
+                  onViewReport={() => setActiveTab("reports")}
+                />
               )}
-              {activeTab === "reports" && (
-                <AuditReport report={currentReport} />
-              )}
+              {activeTab === "reports" && currentReport && (
+            <AuditReport report={currentReport} />
+          )}
+          {activeTab === "knowledge" && (
+            <KnowledgeBank />
+          )}
               {activeTab === "history" && (
                 <div className="p-8 space-y-6">
                   <h1 className="text-4xl font-heading mb-4">Audit History</h1>
