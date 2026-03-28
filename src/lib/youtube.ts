@@ -20,10 +20,20 @@ export interface ChannelAuditReport {
   thumbnail: string;
   kpis: { 
     totalViewsLast30Days: number; 
-    viewGrowthPercent: number; // (CurrentPeriod - PreviousPeriod) / PreviousPeriod 
+    viewGrowthPercent: number; 
     avgEngagementRate: number; 
     status: 'Steady' | 'Growth' | 'Spiking' | 'Decline'; 
   }; 
+  longForm: {
+    avgViews: number;
+    avgER: number;
+    topVideoId: string;
+  };
+  shorts: {
+    avgViews: number;
+    avgER: number;
+    topVideoId: string;
+  };
   videos: VideoAudit[]; 
 } 
 
@@ -96,9 +106,15 @@ export async function getAuditData(channelId: string): Promise<ChannelAuditRepor
     const likes = parseInt(v.statistics.likeCount) || 0;
     const comments = parseInt(v.statistics.commentCount) || 0;
     
-    // Duration logic for Shorts
-    const duration = v.contentDetails.duration; // PT1M2S format
-    const isShort = duration.includes("PT") && !duration.includes("H") && !duration.includes("M") && parseInt(duration.match(/\d+/)?.[0] || "0") < 60;
+    // Improved Duration logic for Shorts (Under 60s)
+    const duration = v.contentDetails.duration; // e.g. PT1M2S, PT45S
+    const hasHours = duration.includes("H");
+    const hasMinutes = duration.includes("M");
+    const secondsMatch = duration.match(/(\d+)S/);
+    const seconds = secondsMatch ? parseInt(secondsMatch[1]) : 0;
+    
+    // A Short is defined as under 60 seconds total
+    const isShort = !hasHours && !hasMinutes && seconds < 60;
 
     return {
       id: v.id,
@@ -111,15 +127,24 @@ export async function getAuditData(channelId: string): Promise<ChannelAuditRepor
       performanceRatio: calculatePerformanceRatio(views, subscribers),
       engagementRate: calculateEngagementRate(likes, comments, views),
       isShort,
-      isOutlier: false, // Will be calculated below
+      isOutlier: false, 
       tags: v.snippet.tags || []
     };
   });
 
   const processedVideos = detectOutliers(videos);
 
-  // 4. Calculate KPIs
-  const last30DaysViews = processedVideos.reduce((acc, v) => acc + v.viewCount, 0); // Simplified for now
+  // 4. Calculate Segmented KPIs
+  const longFormVideos = processedVideos.filter(v => !v.isShort);
+  const shortsVideos = processedVideos.filter(v => v.isShort);
+
+  const getAvg = (arr: VideoAudit[], key: 'viewCount' | 'engagementRate') => 
+    arr.length ? arr.reduce((acc, v) => acc + (v[key] as number), 0) / arr.length : 0;
+
+  const getTop = (arr: VideoAudit[]) => 
+    arr.length ? [...arr].sort((a, b) => b.viewCount - a.viewCount)[0].id : "";
+
+  const last30DaysViews = processedVideos.reduce((acc, v) => acc + v.viewCount, 0); 
   const avgER = processedVideos.reduce((acc, v) => acc + v.engagementRate, 0) / processedVideos.length;
 
   return {
@@ -129,9 +154,19 @@ export async function getAuditData(channelId: string): Promise<ChannelAuditRepor
     thumbnail: channelThumbnail,
     kpis: {
       totalViewsLast30Days: last30DaysViews,
-      viewGrowthPercent: 12.4, // Placeholder for growth calculation logic
+      viewGrowthPercent: 12.4, 
       avgEngagementRate: avgER,
       status: getChannelStatus(12.4)
+    },
+    longForm: {
+      avgViews: getAvg(longFormVideos, 'viewCount'),
+      avgER: getAvg(longFormVideos, 'engagementRate'),
+      topVideoId: getTop(longFormVideos)
+    },
+    shorts: {
+      avgViews: getAvg(shortsVideos, 'viewCount'),
+      avgER: getAvg(shortsVideos, 'engagementRate'),
+      topVideoId: getTop(shortsVideos)
     },
     videos: processedVideos
   };

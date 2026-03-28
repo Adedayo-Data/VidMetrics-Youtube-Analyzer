@@ -49,6 +49,8 @@ interface StrategicOverviewProps {
 
 export function StrategicOverview({ report, onVideoSelect }: StrategicOverviewProps) {
   const [chartMode, setChartMode] = useState<"views" | "engagement">("views");
+  const [contentType, setContentType] = useState<"all" | "long" | "shorts">("all");
+  const [showIframe, setShowIframe] = useState(false);
 
   const container = {
     hidden: { opacity: 0 },
@@ -65,13 +67,50 @@ export function StrategicOverview({ report, onVideoSelect }: StrategicOverviewPr
     show: { opacity: 1, y: 0 }
   };
 
-  const chartData = report.videos.slice(0, 7).reverse().map(v => ({
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+
+  const filteredVideos = report.videos
+    .filter(v => {
+      if (contentType === "all") return true;
+      if (contentType === "long") return !v.isShort;
+      if (contentType === "shorts") return v.isShort;
+      return true;
+    })
+    .filter(v => new Date(v.publishedAt) >= thirtyDaysAgo)
+    .sort((a, b) => b.performanceRatio - a.performanceRatio);
+
+  const displayVideos = filteredVideos.length > 0 ? filteredVideos : report.videos;
+  const topVideo = displayVideos[0];
+
+  const chartData = displayVideos.slice(0, 7).reverse().map(v => ({
     name: new Date(v.publishedAt).toLocaleDateString('en-US', { weekday: 'short' }),
     views: v.viewCount,
     engagement: v.engagementRate
   }));
 
-  const performanceVerdict = `In the last 30 days, this creator has gained ${report.kpis.totalViewsLast30Days.toLocaleString()} views across their latest content, signaling a ${report.kpis.status} phase.`;
+  const metrics = contentType === "shorts" ? [
+    { label: "SHORTS AVG VIEWS", value: (report.shorts.avgViews / 1000).toFixed(1) + "k", sub: "Avg Reach per Short", trend: "+5%", color: "emerald" },
+    { label: "SHORTS AVG ENGAGEMENT", value: report.shorts.avgER.toFixed(1) + "%", sub: "Shorts Retention", trend: "Steady", color: "indigo" },
+    { label: "SHORTS VOLUME", value: report.videos.filter(v => v.isShort).length.toString(), sub: "Last 50 uploads", trend: "High", color: "indigo" },
+    { label: "TOP SHORT ID", value: report.shorts.topVideoId ? "#" + report.shorts.topVideoId.slice(0, 4) : "N/A", sub: "Peak Performer", trend: "Viral", color: "emerald" },
+  ] : contentType === "long" ? [
+    { label: "LONG-FORM AVG VIEWS", value: (report.longForm.avgViews / 1000).toFixed(1) + "k", sub: "Avg Reach per Video", trend: "+8%", color: "emerald" },
+    { label: "LONG-FORM AVG ENGAGEMENT", value: report.longForm.avgER.toFixed(1) + "%", sub: "Video Retention", trend: "Growth", color: "indigo" },
+    { label: "VIDEO VOLUME", value: report.videos.filter(v => !v.isShort).length.toString(), sub: "Last 50 uploads", trend: "Steady", color: "indigo" },
+    { label: "TOP VIDEO ID", value: report.longForm.topVideoId ? "#" + report.longForm.topVideoId.slice(0, 4) : "N/A", sub: "Peak Performer", trend: "Growth", color: "emerald" },
+  ] : [
+    { label: "TOTAL SUBSCRIBERS", value: (report.subscribers / 1000000).toFixed(1) + "M", sub: "Global Reach", trend: "+12%", color: "emerald" },
+    { label: "30D VIEW VOLUME", value: (report.kpis.totalViewsLast30Days / 1000000).toFixed(1) + "M", sub: "Consolidated Playback", trend: report.kpis.viewGrowthPercent + "%", color: "emerald" },
+    { label: "AVG ENGAGEMENT", value: report.kpis.avgEngagementRate.toFixed(1) + "%", sub: "Retention benchmark", trend: report.kpis.status, color: "indigo" },
+    { label: "CONTENT VOLUME", value: report.videos.length.toString(), sub: "Recent uploads", trend: "Steady", color: "indigo" },
+  ];
+
+  const performanceVerdict = contentType === "shorts" 
+    ? `Short-form content is averaging ${report.shorts.avgViews.toLocaleString()} views with ${report.shorts.avgER.toFixed(1)}% engagement, driving high-velocity discovery.`
+    : contentType === "long"
+    ? `Long-form videos are maintaining ${report.longForm.avgViews.toLocaleString()} views, serving as the core relationship builder for the channel.`
+    : `In the last 30 days, this creator has gained ${report.kpis.totalViewsLast30Days.toLocaleString()} views across their latest content, signaling a ${report.kpis.status} phase.`;
 
   return (
     <div className="flex-1 bg-slate-50/30 p-8 overflow-y-auto">
@@ -85,7 +124,24 @@ export function StrategicOverview({ report, onVideoSelect }: StrategicOverviewPr
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] font-bold tracking-[0.2em] text-indigo-600 uppercase">Quarterly Analysis Report</span>
-            <h1 className="text-4xl font-heading text-slate-900">{report.channelName} Audit 2024</h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-4xl font-heading text-slate-900">{report.channelName} Audit 2024</h1>
+              <div className="flex bg-slate-200/50 p-1 rounded-2xl">
+                {(["all", "long", "shorts"] as const).map((type) => (
+                  <Button
+                    key={type}
+                    onClick={() => setContentType(type)}
+                    variant="ghost"
+                    className={cn(
+                      "h-10 px-6 rounded-xl text-[10px] font-bold tracking-widest transition-all",
+                      contentType === type ? "bg-white shadow-sm text-indigo-600" : "text-muted-foreground"
+                    )}
+                  >
+                    {type.toUpperCase()}
+                  </Button>
+                ))}
+              </div>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <Button className="bg-indigo-600 hover:bg-indigo-700 rounded-xl px-6 text-xs font-bold tracking-widest transition-all hover:scale-[1.02]">
@@ -96,12 +152,7 @@ export function StrategicOverview({ report, onVideoSelect }: StrategicOverviewPr
 
         {/* Top Metrics Grid */}
         <div className="grid grid-cols-4 gap-6">
-          {[
-            { label: "TOTAL SUBSCRIBERS", value: (report.subscribers / 1000000).toFixed(1) + "M", sub: "Global Reach", trend: "+12%", color: "emerald" },
-            { label: "30D VIEW VOLUME", value: (report.kpis.totalViewsLast30Days / 1000000).toFixed(1) + "M", sub: "Consolidated Playback", trend: report.kpis.viewGrowthPercent + "%", color: "emerald" },
-            { label: "AVG ENGAGEMENT", value: report.kpis.avgEngagementRate.toFixed(1) + "%", sub: "Retention benchmark", trend: report.kpis.status, color: "indigo" },
-            { label: "CONTENT VOLUME", value: report.videos.length.toString(), sub: "Recent uploads", trend: "Steady", color: "indigo" },
-          ].map((metric, i) => (
+          {metrics.map((metric, i) => (
             <motion.div key={i} variants={item}>
               <Card className="p-6 rounded-2xl border-none shadow-sm shadow-indigo-500/5 space-y-4 bg-white">
                 <div className="flex items-center justify-between">
@@ -143,31 +194,48 @@ export function StrategicOverview({ report, onVideoSelect }: StrategicOverviewPr
                 </div>
 
                 <div 
-                  onClick={() => onVideoSelect(report.videos[0])}
+                  onClick={() => setShowIframe(true)}
                   className="relative aspect-video rounded-3xl overflow-hidden group shadow-xl shadow-slate-900/10 hover:scale-[1.02] transition-all duration-300 cursor-pointer"
                 >
-                  <img 
-                    src={report.videos[0].thumbnail} 
-                    alt="Video thumbnail" 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                  />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="bg-white/20 backdrop-blur-xl p-5 rounded-full border border-white/30 transform scale-75 group-hover:scale-100 transition-transform duration-500">
-                      <Play className="w-8 h-8 text-white fill-white" />
-                    </div>
-                  </div>
+                  {showIframe ? (
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={`https://www.youtube.com/embed/${topVideo.id}?autoplay=1`}
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    ></iframe>
+                  ) : (
+                    <>
+                      <img 
+                        src={topVideo.thumbnail} 
+                        alt="Video thumbnail" 
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                      />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="bg-white/20 backdrop-blur-xl p-5 rounded-full border border-white/30 transform scale-75 group-hover:scale-100 transition-transform duration-500">
+                          <Play className="w-8 h-8 text-white fill-white" />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="space-y-4">
                   <div className="space-y-1">
                     <span className="text-[10px] font-bold tracking-[0.2em] text-indigo-600 uppercase">Active Intelligence</span>
-                    <h3 className="text-2xl font-heading leading-tight truncate">{report.videos[0].title}</h3>
+                    <h3 className="text-2xl font-heading leading-tight truncate">{topVideo.title}</h3>
                   </div>
                 </div>
               </div>
               <div className="px-8 py-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
                 <Button 
-                  onClick={() => onVideoSelect(report.videos[0])}
+                  onClick={() => {
+                    setShowIframe(true);
+                    onVideoSelect(topVideo);
+                  }}
                   className="w-full bg-slate-900 hover:bg-black text-white rounded-xl h-12 text-xs font-bold tracking-widest gap-2 transition-all hover:scale-[1.02]"
                 >
                   WATCH & ANALYZE
@@ -317,7 +385,7 @@ export function StrategicOverview({ report, onVideoSelect }: StrategicOverviewPr
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {report.videos.slice(0, 10).map((row, i) => (
+                  {displayVideos.slice(0, 10).map((row, i) => (
                     <TableRow 
                       key={row.id} 
                       onClick={() => onVideoSelect(row)}

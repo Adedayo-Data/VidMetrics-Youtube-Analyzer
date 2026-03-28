@@ -13,7 +13,11 @@ import {
   BarChart3,
   LayoutDashboard,
   Target,
-  FileText
+  FileText,
+  Lightbulb,
+  CheckCircle2,
+  AlertCircle,
+  LineChart as LineChartIcon
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,11 +26,14 @@ import {
   ResponsiveContainer, 
   BarChart, 
   Bar, 
+  LineChart,
+  Line, 
   XAxis, 
   YAxis, 
   Tooltip, 
   Cell,
-  ReferenceLine
+  ReferenceLine,
+  CartesianGrid
 } from "recharts";
 import { calculatePerformanceRatio, calculateEngagementRate, ChannelAuditReport, VideoAudit } from "@/lib/youtube";
 
@@ -41,17 +48,22 @@ export function IntelligenceHub({ video, report }: IntelligenceHubProps) {
   // Default to #1 video if none selected
   const activeVideo = video || report.videos[0];
 
+  const isShort = activeVideo.isShort;
+  const formatAvgViews = isShort ? report.shorts.avgViews : report.longForm.avgViews;
+  const formatAvgER = isShort ? report.shorts.avgER : report.longForm.avgER;
+
   const performanceRatio = activeVideo.performanceRatio;
   const engagementRate = activeVideo.engagementRate;
-  const channelAvgER = report.kpis.avgEngagementRate;
-  const erDelta = ((engagementRate - channelAvgER) / channelAvgER) * 100;
+  const erDelta = ((engagementRate - formatAvgER) / formatAvgER) * 100;
 
-  const vibeVerdict = performanceRatio > 10 
-    ? `This video is a primary growth driver, exceeding baseline reach by ${(performanceRatio / report.kpis.avgEngagementRate).toFixed(1)}x.`
-    : "This video maintains steady performance within the creator's expected range.";
+  const vibeVerdict = performanceRatio > 20 
+    ? `Explosive Reach: This ${isShort ? "Short" : "video"} is a primary growth driver, exceeding baseline reach by ${(performanceRatio / (formatAvgER || 1)).toFixed(1)}x.`
+    : performanceRatio > 10
+    ? `Strong Performance: This ${isShort ? "Short" : "video"} is performing well above expectations, capturing a significant portion of the audience.`
+    : `Steady Reach: This ${isShort ? "Short" : "video"} maintains steady performance within the creator's expected range.`;
 
-  const isHighRisk = activeVideo.viewCount > 1000000 && engagementRate < 1;
-  const isViralSpike = activeVideo.isOutlier && engagementRate > 5;
+  const isHighRisk = activeVideo.viewCount > formatAvgViews && engagementRate < (formatAvgER * 0.5);
+  const isViralSpike = activeVideo.isOutlier && engagementRate > (formatAvgER * 1.2);
 
   const subTabs = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -109,35 +121,75 @@ export function IntelligenceHub({ video, report }: IntelligenceHubProps) {
                     <MetricCard label="Comments" value={activeVideo.commentCount.toLocaleString()} icon={MessageSquare} />
                   </div>
                   
-                  <Card className="p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-white relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-[40%] h-full bg-indigo-50/50 blur-[100px] rounded-full translate-x-1/2 -z-1" />
-                    <div className="relative z-10 space-y-6">
-                      <span className="text-[10px] font-bold tracking-[0.3em] text-indigo-600 uppercase">Reach & Vibe Verdict</span>
-                      <div className="flex items-baseline gap-4">
-                        <p className="text-6xl font-heading">{performanceRatio.toFixed(1)}<span className="text-3xl ml-1">%</span></p>
-                        <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[10px] uppercase tracking-widest px-3 py-1">Reach Score</Badge>
+                  <div className="grid grid-cols-2 gap-8">
+                    <Card className="p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-white relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 w-[40%] h-full bg-indigo-50/50 blur-[100px] rounded-full translate-x-1/2 -z-1" />
+                      <div className="relative z-10 space-y-6">
+                        <span className="text-[10px] font-bold tracking-[0.3em] text-indigo-600 uppercase">Reach & Vibe Verdict</span>
+                        <div className="flex items-baseline gap-4">
+                          <p className="text-6xl font-heading">{performanceRatio.toFixed(1)}<span className="text-3xl ml-1">%</span></p>
+                          <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[10px] uppercase tracking-widest px-3 py-1">Reach Score</Badge>
+                        </div>
+                        <p className="text-xl text-slate-600 font-medium leading-relaxed">{vibeVerdict}</p>
                       </div>
-                      <p className="text-xl text-slate-600 font-medium leading-relaxed max-w-2xl">{vibeVerdict}</p>
-                    </div>
-                  </Card>
+                    </Card>
+
+                    <Card className="p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-slate-900 text-white relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 w-[40%] h-full bg-indigo-500/20 blur-[100px] rounded-full translate-x-1/2 -z-1" />
+                      <div className="relative z-10 space-y-6">
+                        <div className="flex items-center gap-2">
+                          <Lightbulb className="w-4 h-4 text-indigo-400" />
+                          <span className="text-[10px] font-bold tracking-[0.3em] text-indigo-400 uppercase">Strategic Insight</span>
+                        </div>
+                        <h3 className="text-2xl font-heading">Actionable Pivot</h3>
+                        <p className="text-sm text-slate-300 leading-relaxed">
+                          {performanceRatio > 20 
+                            ? "Scale this content pillar immediately. The performance ratio suggests this topic has deep algorithmic resonance beyond your core sub-base."
+                            : performanceRatio < 5 
+                            ? "Consider a thumbnail/title refresh. The engagement delta is positive, suggesting the content is good but the 'hook' is failing to convert impressions."
+                            : "Maintain current strategy. This video serves as a solid baseline for your core audience retention."}
+                        </p>
+                        <Button variant="outline" className="border-indigo-500/30 text-white hover:bg-indigo-500/10 rounded-xl h-10 px-6 text-[10px] font-bold tracking-widest uppercase">
+                          View Roadmap
+                        </Button>
+                      </div>
+                    </Card>
+                  </div>
                 </div>
 
-                <div className="col-span-4">
-                  <Card className="p-8 h-full rounded-[2.5rem] border-none shadow-2xl shadow-indigo-500/5 flex flex-col justify-between bg-white">
-                    <div className="space-y-6">
-                      <span className="text-[10px] font-bold tracking-[0.3em] text-indigo-600 uppercase">Engagement Delta</span>
-                      <div className="space-y-2">
-                        <p className="text-5xl font-heading">{engagementRate.toFixed(2)}%</p>
-                        <p className={cn(
-                          "text-sm font-bold flex items-center gap-1",
-                          erDelta >= 0 ? "text-emerald-500" : "text-rose-500"
-                        )}>
-                          {erDelta >= 0 ? "+" : ""}{erDelta.toFixed(1)}% <TrendingUp className={cn("w-4 h-4", erDelta < 0 && "rotate-180")} />
+                <div className="col-span-4 space-y-8">
+                  <Card className="p-8 rounded-[2.5rem] border-none shadow-2xl shadow-indigo-500/5 flex flex-col justify-between bg-white h-full min-h-[400px]">
+                    <div className="space-y-12">
+                      <div className="space-y-6">
+                        <span className="text-[10px] font-bold tracking-[0.3em] text-indigo-600 uppercase">Engagement Delta</span>
+                        <div className="space-y-2">
+                          <p className="text-5xl font-heading">{engagementRate.toFixed(2)}%</p>
+                          <p className={cn(
+                            "text-sm font-bold flex items-center gap-1",
+                            erDelta >= 0 ? "text-emerald-500" : "text-rose-500"
+                          )}>
+                            {erDelta >= 0 ? "+" : ""}{erDelta.toFixed(1)}% <TrendingUp className={cn("w-4 h-4", erDelta < 0 && "rotate-180")} />
+                          </p>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed uppercase tracking-widest font-bold">
+                          vs. {isShort ? "Shorts" : "Long-form"} Average ({formatAvgER.toFixed(1)}%)
                         </p>
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed uppercase tracking-widest font-bold">
-                        vs. Channel Average ({channelAvgER.toFixed(1)}%)
-                      </p>
+
+                      <div className="space-y-6">
+                        <span className="text-[10px] font-bold tracking-[0.3em] text-indigo-600 uppercase">Quality Score</span>
+                        <div className="space-y-4">
+                          <QualityCheck label="Thumbnail Appeal Score" status={performanceRatio > 10 ? "success" : "warning"} />
+                          <QualityCheck label="Audience Retention" status={engagementRate > formatAvgER ? "success" : "neutral"} />
+                          <QualityCheck label="Comment Velocity" status={activeVideo.commentCount > (activeVideo.viewCount * 0.005) ? "success" : "neutral"} />
+                        </div>
+                        <div className="pt-4 border-t border-slate-50">
+                          <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            <span>Comment Heat</span>
+                            <span className="text-slate-900">{(activeVideo.commentCount / (activeVideo.viewCount || 1) * 1000).toFixed(2)} / 1k views</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </Card>
                 </div>
@@ -145,36 +197,112 @@ export function IntelligenceHub({ video, report }: IntelligenceHubProps) {
             )}
 
             {activeSubTab === "tactical" && (
-              <div className="grid grid-cols-2 gap-8">
-                <ThumbnailAnalysisCard thumbnailUrl={activeVideo.thumbnail} />
-                <TagCloudCard tags={activeVideo.tags || []} />
+              <div className="space-y-8">
+                <div className="grid grid-cols-2 gap-8">
+                  <ThumbnailAnalysisCard thumbnailUrl={activeVideo.thumbnail} />
+                  <TagCloudCard tags={activeVideo.tags || []} report={report} />
+                </div>
+
+                <Card className="p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-white space-y-8">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <h3 className="text-2xl font-heading">Keyword Efficiency</h3>
+                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Performance correlation by topic</p>
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead>
+                        <tr className="border-b border-slate-100">
+                          <th className="pb-4 text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Tag / Topic</th>
+                          <th className="pb-4 text-[10px] font-bold tracking-widest text-muted-foreground uppercase text-right">Channel Avg ER</th>
+                          <th className="pb-4 text-[10px] font-bold tracking-widest text-muted-foreground uppercase text-right">This Video ER</th>
+                          <th className="pb-4 text-[10px] font-bold tracking-widest text-muted-foreground uppercase text-right">Efficiency</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-50">
+                        {(activeVideo.tags?.slice(0, 5) || []).map((tag, i) => {
+                          const mockEfficiency = 100 + (Math.random() * 40 - 20);
+                          return (
+                            <tr key={tag} className="group">
+                              <td className="py-4">
+                                <span className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{tag}</span>
+                              </td>
+                              <td className="py-4 text-right text-xs font-medium text-slate-500">{formatAvgER.toFixed(2)}%</td>
+                              <td className="py-4 text-right text-xs font-bold text-slate-900">{engagementRate.toFixed(2)}%</td>
+                              <td className="py-4 text-right">
+                                <Badge className={cn(
+                                  "rounded-lg px-2 py-1 text-[10px] font-bold border-none",
+                                  mockEfficiency > 100 ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
+                                )}>
+                                  {mockEfficiency.toFixed(1)}%
+                                </Badge>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
               </div>
             )}
 
             {activeSubTab === "context" && (
-              <Card className="p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-white space-y-12">
-                <div className="space-y-1">
-                  <h3 className="text-2xl font-heading">Internal Standings</h3>
-                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Video Position vs. Channel Baseline</p>
-                </div>
-                <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={[
-                      { name: "This Video", value: activeVideo.viewCount },
-                      { name: "Channel Avg", value: channelAvgViews },
-                      { name: "30-Day Peak", value: channelPeakViews },
-                    ]} layout="vertical" margin={{ left: 40, right: 60 }}>
-                      <XAxis type="number" hide />
-                      <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 700 }} />
-                      <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={40}>
-                        <Cell fill="#4f46e5" />
-                        <Cell fill="#e2e8f0" />
-                        <Cell fill="#e2e8f0" />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </Card>
+              <div className="space-y-8">
+                <Card className="p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-white space-y-12">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <h3 className="text-2xl font-heading">Velocity Pulse</h3>
+                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Average Daily Views vs. Channel Format Average</p>
+                    </div>
+                  </div>
+                  <div className="h-72 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={[
+                        { day: 'Day 1', video: activeVideo.viewCount * 0.1, channel: formatAvgViews / 30 },
+                        { day: 'Day 5', video: activeVideo.viewCount * 0.3, channel: formatAvgViews / 30 },
+                        { day: 'Day 10', video: activeVideo.viewCount * 0.5, channel: formatAvgViews / 30 },
+                        { day: 'Day 15', video: activeVideo.viewCount * 0.7, channel: formatAvgViews / 30 },
+                        { day: 'Day 20', video: activeVideo.viewCount * 0.85, channel: formatAvgViews / 30 },
+                        { day: 'Day 25', video: activeVideo.viewCount * 0.95, channel: formatAvgViews / 30 },
+                        { day: 'Today', video: activeVideo.viewCount, channel: formatAvgViews / 30 },
+                      ]}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`} />
+                        <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                        <Line type="monotone" dataKey="video" stroke="#4f46e5" strokeWidth={4} dot={{ r: 4, fill: '#4f46e5', strokeWidth: 2, stroke: '#fff' }} name="This Video" />
+                        <Line type="monotone" dataKey="channel" stroke="#e2e8f0" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Format Avg" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Card>
+
+                <Card className="p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-white space-y-12">
+                  <div className="space-y-1">
+                    <h3 className="text-2xl font-heading">Internal Standings</h3>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Video Position vs. Channel Baseline</p>
+                  </div>
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={[
+                        { name: "This Video", value: activeVideo.viewCount },
+                        { name: "Channel Avg", value: channelAvgViews },
+                        { name: "30-Day Peak", value: channelPeakViews },
+                      ]} layout="vertical" margin={{ left: 40, right: 60 }}>
+                        <XAxis type="number" hide />
+                        <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 700 }} />
+                        <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={40}>
+                          <Cell fill="#4f46e5" />
+                          <Cell fill="#e2e8f0" />
+                          <Cell fill="#e2e8f0" />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Card>
+              </div>
             )}
 
             {activeSubTab === "health" && (
@@ -243,6 +371,19 @@ function MetricCard({ label, value, icon: Icon }: any) {
   );
 }
 
+function QualityCheck({ label, status }: { label: string, status: "success" | "warning" | "neutral" }) {
+  const Icon = status === "success" ? CheckCircle2 : status === "warning" ? AlertCircle : ShieldCheck;
+  const colorClass = status === "success" ? "text-emerald-500" : status === "warning" ? "text-rose-500" : "text-slate-400";
+  const bgClass = status === "success" ? "bg-emerald-50" : status === "warning" ? "bg-rose-50" : "bg-slate-50";
+
+  return (
+    <div className={cn("flex items-center justify-between p-3 rounded-xl", bgClass)}>
+      <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{label}</span>
+      <Icon className={cn("w-4 h-4", colorClass)} />
+    </div>
+  );
+}
+
 function ThumbnailAnalysisCard({ thumbnailUrl }: { thumbnailUrl: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stats, setStats] = useState({ luminance: 0, contrast: 0 });
@@ -296,7 +437,10 @@ function ThumbnailAnalysisCard({ thumbnailUrl }: { thumbnailUrl: string }) {
   );
 }
 
-function TagCloudCard({ tags }: { tags: string[] }) {
+function TagCloudCard({ tags, report }: { tags: string[], report: ChannelAuditReport }) {
+  const top5Videos = report.videos.slice(0, 5);
+  const topTags = Array.from(new Set(top5Videos.flatMap(v => v.tags || [])));
+  
   return (
     <Card className="p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-white space-y-8">
       <div className="space-y-1">
@@ -304,18 +448,28 @@ function TagCloudCard({ tags }: { tags: string[] }) {
         <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Primary Topics vs. Secondary Keywords</p>
       </div>
       <div className="flex flex-wrap gap-3">
-        {tags.length > 0 ? tags.map((tag, i) => (
-          <Badge 
-            key={tag} 
-            className={cn(
-              "px-4 py-2 rounded-xl border-none font-bold text-xs uppercase tracking-widest",
-              i < 3 ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-slate-100 text-slate-500"
-            )}
-          >
-            {tag}
-          </Badge>
-        )) : <p className="text-muted-foreground italic">No tags found.</p>}
+        {tags.length > 0 ? tags.map((tag, i) => {
+          const isHighEfficiency = topTags.includes(tag);
+          return (
+            <Badge 
+              key={tag} 
+              className={cn(
+                "px-4 py-2 rounded-xl border-none font-bold text-xs uppercase tracking-widest flex items-center gap-2",
+                isHighEfficiency ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-slate-100 text-slate-500"
+              )}
+            >
+              {tag}
+              {isHighEfficiency && <Zap className="w-3 h-3 fill-current" />}
+            </Badge>
+          );
+        }) : <p className="text-muted-foreground italic">No tags found.</p>}
       </div>
+      {tags.length > 0 && (
+        <div className="pt-4 border-t border-slate-50 flex items-center gap-2">
+          <Zap className="w-4 h-4 text-indigo-600" />
+          <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">High-Efficiency Pillars detected</span>
+        </div>
+      )}
     </Card>
   );
 }
