@@ -20,53 +20,117 @@ export default function Home() {
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
   const [auditHistory, setAuditHistory] = useState<string[]>([]);
   const [currentReport, setCurrentReport] = useState<ChannelAuditReport | null>(null);
-  const [featuredCreator, setFeaturedCreator] = useState<ChannelAuditReport | null>(null);
+  const [featuredCreator, setFeaturedCreator] = useState<ChannelAuditReport | null>({
+    channelId: "UCBJycsmduvYELg8GaZPBnZg",
+    channelName: "MKBHD",
+    subscribers: 18500000,
+    thumbnail: "https://yt3.googleusercontent.com/1-7_88_BvC6Y-U_S8_1_S_1-7_88_BvC6Y-U_S8_1_S_1-7_88_BvC6Y-U_S8_1_S_1-7_88_BvC6Y-U_S8_1_S",
+    kpis: {
+      totalViewsLast30Days: 38000000,
+      viewGrowthPercent: 12.4,
+      avgEngagementRate: 8.2,
+      status: "Growth"
+    },
+    longForm: { avgViews: 2400000, avgER: 7.5, topVideoId: "" },
+    shorts: { avgViews: 1200000, avgER: 9.2, topVideoId: "" },
+    videos: [
+      {
+        id: "X_XN",
+        title: "MKBHD: The Future of Spatial Computing Analysis",
+        thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070",
+        viewCount: 2400000,
+        publishedAt: new Date().toISOString(),
+        likeCount: 150000,
+        commentCount: 12000,
+        performanceRatio: 12.9,
+        engagementRate: 6.7,
+        isShort: false,
+        isOutlier: false
+      }
+    ]
+  });
   const [sampleCreators, setSampleCreators] = useState<ChannelAuditReport[]>([]);
 
-  const POPULAR_CHANNEL_IDS = [
-    "UCBJycsmduvYELg8GaZPBnZg", // MKBHD
-    "UCXuqSBlHAE6Xw-yeJA0Tunw", // Linus Tech Tips
-    "UCsXVkYYQyFubOR46I6GoM6Q", // Kurzgesagt
-    "UCBa6G_zjCcNo726zkxiWJyA", // Veritasium
-  ];
 
   useEffect(() => {
     const history = localStorage.getItem("vidmetrics_history");
     if (history) setAuditHistory(JSON.parse(history));
-
-    const fetchInitialData = async () => {
-      try {
-        const reports = await Promise.all(
-          POPULAR_CHANNEL_IDS.map(async (id) => {
-            const res = await fetch("/api/audit", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ query: id }),
-            });
-            const data = await res.json();
-            return data.success ? data.data : null;
-          })
-        );
-        const validReports = reports.filter(r => r !== null);
-        if (validReports.length > 0) {
-          setFeaturedCreator(validReports[0]);
-          setSampleCreators(validReports.slice(1));
-        }
-      } catch (error) {
-        console.error("Initial data fetch failed:", error);
+    
+    // Use static mock data only - no API calls on landing page
+    setSampleCreators([
+      {
+        channelId: "UCXuqSBlHAE6Xw-yeJA0Tunw",
+        channelName: "Linus Tech Tips",
+        subscribers: 15800000,
+        thumbnail: "https://yt3.googleusercontent.com/ytc/AIdro_m2r2CJDWhGmKMot9U6yfv-L0FdX8FJf03Cq5WwWfMq-A=s176-c-k-c0x00ffffff-no-rj",
+        kpis: {
+          totalViewsLast30Days: 42000000,
+          viewGrowthPercent: 8.7,
+          avgEngagementRate: 7.1,
+          status: "Growth"
+        },
+        longForm: { avgViews: 1800000, avgER: 6.8, topVideoId: "" },
+        shorts: { avgViews: 950000, avgER: 8.5, topVideoId: "" },
+        videos: []
+      },
+      {
+        channelId: "UCsXVkYYQyFubOR46I6GoM6Q",
+        channelName: "Kurzgesagt",
+        subscribers: 22400000,
+        thumbnail: "https://yt3.googleusercontent.com/ytc/AIdro_nO5I0QcJdIeL1dEQRtfv0qRNY_3B7eRc4Yme1XSqY-bg=s176-c-k-c0x00ffffff-no-rj",
+        kpis: {
+          totalViewsLast30Days: 55000000,
+          viewGrowthPercent: 15.2,
+          avgEngagementRate: 9.8,
+          status: "Viral"
+        },
+        longForm: { avgViews: 3200000, avgER: 9.5, topVideoId: "" },
+        shorts: { avgViews: 1500000, avgER: 10.2, topVideoId: "" },
+        videos: []
+      },
+      {
+        channelId: "UCBa6G_zjCcNo726zkxiWJyA",
+        channelName: "Veritasium",
+        subscribers: 14600000,
+        thumbnail: "https://yt3.googleusercontent.com/ytc/AIdro_lGRrhC8qI8-3p8i0H8b2m2B5dM9gL5F3oP8d0c=s176-c-k-c0x00ffffff-no-rj",
+        kpis: {
+          totalViewsLast30Days: 28000000,
+          viewGrowthPercent: 5.3,
+          avgEngagementRate: 8.4,
+          status: "Steady"
+        },
+        longForm: { avgViews: 2100000, avgER: 8.1, topVideoId: "" },
+        shorts: { avgViews: 800000, avgER: 8.9, topVideoId: "" },
+        videos: []
+      },
+      {
+        channelId: "UC0S4z2fXGuThbtA_Uf-vM_Q",
+        channelName: "CNBC Make It",
+        subscribers: 8900000,
+        thumbnail: "https://yt3.googleusercontent.com/ytc/AIdro_kE4iYQbK8Nq8C9z0D3v8F1hL5jP2oN9sQ7wE4c=s176-c-k-c0x00ffffff-no-rj",
+        kpis: {
+          totalViewsLast30Days: 19000000,
+          viewGrowthPercent: 3.1,
+          avgEngagementRate: 5.9,
+          status: "Stable"
+        },
+        longForm: { avgViews: 1200000, avgER: 5.7, topVideoId: "" },
+        shorts: { avgViews: 600000, avgER: 6.2, topVideoId: "" },
+        videos: []
       }
-    };
-
-    fetchInitialData();
+    ]);
   }, []);
 
   const handleAudit = async (query: string) => {
+    if (!query.trim()) return;
     setIsAuditing(true);
+    setHasResults(false);
+    setCurrentReport(null);
     try {
       const response = await fetch("/api/audit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ query: query.trim() }),
       });
       const data = await response.json();
       if (data.success) {
@@ -92,8 +156,14 @@ export default function Home() {
     setActiveTab("intelligence");
   };
 
+  const handleBackToHome = () => {
+    setHasResults(false);
+    setActiveTab("strategic");
+    setCurrentReport(null);
+  };
+
   return (
-    <main className="flex h-screen bg-slate-50/30 overflow-hidden">
+    <main className="flex h-screen bg-slate-50/30">
       {/* Main Layout */}
       {hasResults && (
         <motion.div 
@@ -105,26 +175,20 @@ export default function Home() {
             activeTab={activeTab} 
             onTabChange={setActiveTab} 
             showExport={!!currentReport}
+            onBackHome={handleBackToHome}
           />
         </motion.div>
       )}
 
-      <div className="flex-1 relative overflow-hidden flex flex-col">
+      <div className="flex-1 relative flex flex-col">
         <AnimatePresence mode="wait">
           {!hasResults && !isAuditing && (
-            <motion.div
-              key="landing"
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
-              transition={{ duration: 0.5 }}
-              className="absolute inset-0"
-            >
               <LandingHero 
                 featuredCreator={featuredCreator}
                 sampleCreators={sampleCreators}
                 onAudit={handleAudit} 
+                isLoading={isAuditing}
               />
-            </motion.div>
           )}
 
           {isAuditing && (

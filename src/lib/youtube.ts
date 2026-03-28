@@ -22,7 +22,7 @@ export interface ChannelAuditReport {
     totalViewsLast30Days: number; 
     viewGrowthPercent: number; 
     avgEngagementRate: number; 
-    status: 'Steady' | 'Growth' | 'Spiking' | 'Decline'; 
+    status: 'Steady' | 'Growth' | 'Spiking' | 'Decline' | 'Viral' | 'Stable'; 
   }; 
   longForm: {
     avgViews: number;

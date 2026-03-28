@@ -28,17 +28,21 @@ interface SidebarProps {
   showExport?: boolean;
   activeTab: string;
   onTabChange: (id: string) => void;
+  onBackHome?: () => void;
 }
 
-export function Sidebar({ showExport, activeTab, onTabChange }: SidebarProps) {
+export function Sidebar({ showExport, activeTab, onTabChange, onBackHome }: SidebarProps) {
   const handleExport = () => {
     window.print();
   };
 
   return (
     <div className="flex flex-col h-full w-64 bg-white border-r border-border/40 py-8 px-4">
-      <div className="mb-10 px-2">
-        <h1 className="text-xl font-heading tracking-tight">
+      <div 
+        onClick={onBackHome}
+        className="mb-10 px-2 cursor-pointer group"
+      >
+        <h1 className="text-xl font-heading tracking-tight group-hover:text-indigo-600 transition-colors">
           VidMetrics <span className="text-muted-foreground font-sans text-[10px] uppercase tracking-widest block mt-0.5">Enterprise</span>
         </h1>
         <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-widest">Global Audit v2.4</p>

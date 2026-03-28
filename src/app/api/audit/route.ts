@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { resolveChannelId, getAuditData } from "@/lib/youtube";
 
+// Simple in-memory cache for demo purposes
+// In production, use Redis or a similar store
+const cache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 1000 * 60 * 60; // 1 hour
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -8,6 +13,16 @@ export async function POST(request: Request) {
 
     if (!query) {
       return NextResponse.json({ success: false, error: "Query is required" }, { status: 400 });
+    }
+
+    // Check Cache
+    const cached = cache.get(query);
+    if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
+      return NextResponse.json({
+        success: true,
+        data: cached.data,
+        cached: true
+      });
     }
 
     const channelId = await resolveChannelId(query);
@@ -19,6 +34,9 @@ export async function POST(request: Request) {
     if (!report) {
       return NextResponse.json({ success: false, error: "Failed to fetch audit data" }, { status: 500 });
     }
+
+    // Set Cache
+    cache.set(query, { data: report, timestamp: Date.now() });
 
     return NextResponse.json({
       success: true,
