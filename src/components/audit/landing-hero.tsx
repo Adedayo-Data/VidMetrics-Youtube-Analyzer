@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { Search, Play, Zap, TrendingUp, ThumbsUp, Clock, Eye } from "lucide-react";
+import { Search, Play, Zap, TrendingUp, Star, ArrowRight, Network, Activity, Clock, BarChart3, Layers } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,38 +14,34 @@ interface LandingHeroProps {
   featuredCreator: ChannelAuditReport | null;
   sampleCreators: ChannelAuditReport[];
   onAudit: (query: string) => void;
+  isLoading?: boolean;
 }
 
-export function LandingHero({ featuredCreator, sampleCreators, onAudit }: LandingHeroProps) {
+export function LandingHero({ featuredCreator, sampleCreators, onAudit, isLoading }: LandingHeroProps) {
   const [query, setQuery] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      onAudit(query);
+      onAudit(query.trim());
     }
   };
 
-  const displayCreator = featuredCreator || {
-    channelName: "MKBHD",
-    subscribers: 18500000,
-    thumbnail: "https://yt3.googleusercontent.com/1-7_88_BvC6Y-U_S8_1_S_1-7_88_BvC6Y-U_S8_1_S_1-7_88_BvC6Y-U_S8_1_S_1-7_88_BvC6Y-U_S8_1_S",
-    kpis: {
-      totalViewsLast30Days: 3800000000,
-      avgEngagementRate: 8.2,
-      status: "Growth"
-    },
-    videos: [
-      {
-        title: "MKBHD: The Future of Spatial Computing Analysis",
-        viewCount: 2400000,
-        publishedAt: new Date().toISOString()
-      }
-    ]
-  };
+  const displayCreator = featuredCreator;
+
+  if (!displayCreator) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.3em]">Initializing Engine...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="relative min-h-screen bg-white overflow-hidden flex flex-col">
+    <div className="relative min-h-screen bg-white flex flex-col">
       {/* Background Glows */}
       <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[60%] bg-indigo-50/50 rounded-full blur-[120px] -z-10" />
       <div className="absolute bottom-[-10%] left-[-5%] w-[50%] h-[50%] bg-lavender-50/30 rounded-full blur-[100px] -z-10" />
@@ -66,35 +63,49 @@ export function LandingHero({ featuredCreator, sampleCreators, onAudit }: Landin
               <div className="h-1 w-64 bg-indigo-100 rounded-full" />
             </div>
 
-            <div className="space-y-8 max-w-md">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
-                  <img src={displayCreator.thumbnail} alt={displayCreator.channelName} className="w-full h-full object-cover" />
+            {/* App Overview Cards */}
+            <div className="space-y-6 max-w-md">
+              <Card className="p-6 rounded-2xl border-slate-100 shadow-lg shadow-indigo-500/5 bg-white">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                    <BarChart3 className="w-6 h-6 text-indigo-600" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="font-heading text-lg">Deep Analytics</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      Analyze any YouTube channel's performance metrics, engagement rates, and content velocity in real-time.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-heading text-xl">{displayCreator.channelName}</h3>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Primary Benchmark</p>
-                </div>
-              </div>
+              </Card>
 
-              <div className="grid grid-cols-2 gap-y-8 gap-x-12">
-                <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Subscribers</p>
-                  <p className="text-2xl font-heading">{(displayCreator.subscribers / 1000000).toFixed(1)}<span className="text-lg ml-0.5">M</span></p>
+              <Card className="p-6 rounded-2xl border-slate-100 shadow-lg shadow-indigo-500/5 bg-white">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                    <Network className="w-6 h-6 text-emerald-600" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="font-heading text-lg">Competitor Mapping</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      Visualize competitive landscapes and identify content gaps to outmaneuver your rivals.
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">30D Views</p>
-                  <p className="text-2xl font-heading">{(displayCreator.kpis.totalViewsLast30Days / 1000000).toFixed(1)}<span className="text-lg ml-0.5">M</span></p>
+              </Card>
+
+              <Card className="p-6 rounded-2xl border-slate-100 shadow-lg shadow-indigo-500/5 bg-white">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
+                    <Zap className="w-6 h-6 text-amber-600" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="font-heading text-lg">Intelligence Reports</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      Generate comprehensive PDF reports with actionable insights and growth recommendations.
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Avg Engagement</p>
-                  <p className="text-2xl font-heading">{displayCreator.kpis.avgEngagementRate.toFixed(1)}<span className="text-lg ml-0.5">%</span></p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Status</p>
-                  <p className="text-2xl font-heading text-indigo-600">{displayCreator.kpis.status}</p>
-                </div>
-              </div>
+              </Card>
             </div>
           </motion.div>
 
@@ -119,122 +130,259 @@ export function LandingHero({ featuredCreator, sampleCreators, onAudit }: Landin
               />
               <Button 
                 type="submit" 
-                className="absolute right-2 top-2 bottom-2 px-8 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold tracking-widest text-[10px]"
+                disabled={isLoading}
+                className="absolute right-2 top-2 bottom-2 px-8 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold tracking-widest text-[10px] disabled:opacity-50"
               >
-                AUDIT
+                {isLoading ? "AUDITING..." : "AUDIT"}
               </Button>
             </form>
 
-            <div className="grid grid-cols-3 gap-6">
-              {/* Spotlight Video Card */}
-              <div className="col-span-2 space-y-6">
-                <Card className="relative aspect-[16/10] overflow-hidden rounded-3xl border-none shadow-2xl shadow-indigo-500/10 group">
-                  <img 
-                    src={displayCreator.videos[0]?.thumbnail || "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop"} 
-                    alt="Featured analysis" 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  
-                  <div className="absolute top-4 right-4">
-                    <Badge className="bg-white/10 backdrop-blur-md border-white/20 text-white font-heading italic px-4 py-1.5 rounded-full">
-                      Trending
+            {/* Case Study Section */}
+            <Card className="relative overflow-hidden rounded-3xl border-none shadow-2xl shadow-indigo-500/10 bg-gradient-to-br from-slate-50 to-white p-8">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-100/30 rounded-full blur-3xl transform translate-x-20 -translate-y-20" />
+              
+              <div className="relative z-10 space-y-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <Badge className="bg-indigo-600 text-white font-heading italic px-3 py-1 rounded-full text-[10px]">
+                      Case Study
                     </Badge>
+                    <h3 className="text-2xl font-heading leading-tight max-w-sm">
+                      How Brand X increased organic reach by <span className="text-indigo-600">40%</span> using Velocity Mapping.
+                    </h3>
                   </div>
-
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="bg-white/20 backdrop-blur-xl p-6 rounded-full border border-white/30 transform scale-75 group-hover:scale-100 transition-transform duration-500">
-                      <Play className="w-8 h-8 text-white fill-white" />
-                    </div>
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
+                    <Star className="w-6 h-6 text-indigo-600 fill-indigo-600" />
                   </div>
+                </div>
 
-                  <div className="absolute bottom-6 left-6 flex items-center gap-3">
-                    <div className="bg-white/90 backdrop-blur p-2 rounded-full">
-                      <Play className="w-4 h-4 text-indigo-600 fill-indigo-600" />
-                    </div>
-                    <span className="text-white font-heading text-lg italic tracking-wide">Watch Analysis</span>
+                <p className="text-sm text-slate-600 max-w-md leading-relaxed">
+                  By identifying competitor content gaps in real-time, Brand X optimized their publishing schedule and content mix. Read the full breakdown.
+                </p>
+
+                <div className="flex items-center gap-4 pt-2">
+                  <Link href="/case-study">
+                    <Button 
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-6 h-11 text-xs font-bold tracking-widest gap-2"
+                    >
+                      Read Case Study
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* Analytics Bento Grid */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mt-16"
+        >
+          <div className="grid grid-cols-12 gap-6">
+            {/* Performance Ratio - Educational Card */}
+            <Card className="col-span-5 p-8 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 bg-white space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground uppercase">PERFORMANCE RATIO</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-heading text-indigo-600">+24.8%</span>
+                    <TrendingUp className="w-5 h-5 text-emerald-500" />
                   </div>
-                </Card>
+                </div>
+                <Badge variant="secondary" className="bg-emerald-50 text-emerald-600 text-[10px] font-bold">
+                  +2.4% vs last mo
+                </Badge>
+              </div>
 
-                <div className="space-y-4">
-                  <span className="text-[10px] font-bold tracking-[0.3em] text-indigo-600 uppercase">Featured Performance</span>
-                  <h2 className="text-4xl font-heading leading-tight max-w-md truncate">
-                    {displayCreator.videos[0]?.title}
-                  </h2>
-                  <div className="flex items-center gap-6 text-[11px] text-muted-foreground font-medium uppercase tracking-widest">
-                    <div className="flex items-center gap-2">
-                      <Eye className="w-3.5 h-3.5" />
-                      {(displayCreator.videos[0]?.viewCount / 1000000).toFixed(1)}M Views
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-3.5 h-3.5" />
-                      {new Date(displayCreator.videos[0]?.publishedAt).toLocaleDateString()}
-                    </div>
+              {/* Chart Area */}
+              <div className="relative h-40 w-full">
+                <svg viewBox="0 0 300 120" className="w-full h-full">
+                  <defs>
+                    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="#4f46e5" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  {/* Area fill */}
+                  <path 
+                    d="M0 100 Q 40 90, 80 70 T 160 50 T 240 30 T 300 20 L 300 120 L 0 120 Z" 
+                    fill="url(#lineGradient)"
+                  />
+                  {/* Line */}
+                  <path 
+                    d="M0 100 Q 40 90, 80 70 T 160 50 T 240 30 T 300 20" 
+                    fill="none" 
+                    stroke="#4f46e5" 
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                  {/* Data points */}
+                  <circle cx="80" cy="70" r="4" fill="#4f46e5" />
+                  <circle cx="160" cy="50" r="4" fill="#4f46e5" />
+                  <circle cx="240" cy="30" r="6" fill="#4f46e5" stroke="white" strokeWidth="2" />
+                </svg>
+              </div>
+
+              {/* Educational Content */}
+              <div className="space-y-3 pt-2">
+                <h4 className="font-heading text-sm text-slate-900">What is Performance Ratio?</h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  A composite metric that measures how efficiently your content converts views into engagement relative to your subscriber base.
+                </p>
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-indigo-600 font-bold uppercase">Strong Growth</p>
+                    <p className="text-[11px] text-slate-600">Ratio &gt; 20% means viral potential</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-emerald-600 font-bold uppercase">Healthy</p>
+                    <p className="text-[11px] text-slate-600">Ratio 10-20% indicates steady growth</p>
                   </div>
                 </div>
               </div>
 
-              {/* Mini Metrics Cards */}
-              <div className="space-y-6">
-                <Card className="p-6 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 space-y-4 bg-white">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Engagement</span>
-                    <Zap className="w-4 h-4 text-indigo-600 fill-indigo-600" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-4xl font-heading">{displayCreator.kpis.avgEngagementRate.toFixed(1)}<span className="text-2xl ml-0.5">%</span></p>
-                    <p className="text-[11px] font-bold text-emerald-500 flex items-center gap-1">
-                      +0.4 <TrendingUp className="w-3 h-3" />
+              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100">
+                <div className="space-y-1">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Efficiency</p>
+                  <p className="text-xl font-heading">0.821</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">CDR Demand</p>
+                  <p className="text-xl font-heading">1.64%</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">VPL/ACT</p>
+                  <p className="text-xl font-heading">High</p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Right Side Stack */}
+            <div className="col-span-7 space-y-6">
+              {/* Competitor Nodes */}
+              <Card className="p-6 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 bg-white">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-4 flex-1">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+                        <Network className="w-5 h-5 text-indigo-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-heading text-lg">Competitor Nodes</h4>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Network Analysis</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-slate-600 max-w-sm">
+                      Mapping 12,400+ interconnected data points across your competitive landscape to reveal hidden patterns.
                     </p>
                   </div>
-                  <div className="h-12 w-full mt-4 bg-indigo-50/50 rounded-lg overflow-hidden relative">
-                    <svg viewBox="0 0 100 40" className="absolute inset-0 w-full h-full">
-                      <path d="M0 35 Q 20 35, 40 25 T 80 15 T 100 5" fill="none" stroke="rgb(79 70 229)" strokeWidth="2" />
+                  
+                  {/* Network Visualization */}
+                  <div className="w-32 h-24 relative">
+                    <svg viewBox="0 0 100 80" className="w-full h-full">
+                      {/* Connection lines */}
+                      <line x1="20" y1="25" x2="50" y2="40" stroke="#cbd5e1" strokeWidth="1" />
+                      <line x1="50" y1="40" x2="80" y2="25" stroke="#cbd5e1" strokeWidth="1" />
+                      <line x1="50" y1="40" x2="50" y2="65" stroke="#cbd5e1" strokeWidth="1" />
+                      <line x1="20" y1="25" x2="80" y2="25" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="2,2" />
+                      <line x1="20" y1="25" x2="50" y2="65" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="2,2" />
+                      <line x1="80" y1="25" x2="50" y2="65" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="2,2" />
+                      
+                      {/* Nodes */}
+                      <circle cx="50" cy="40" r="8" fill="#4f46e5" />
+                      <circle cx="20" cy="25" r="5" fill="#f59e0b" />
+                      <circle cx="80" cy="25" r="5" fill="#10b981" />
+                      <circle cx="50" cy="65" r="5" fill="#f43f5e" />
+                      <circle cx="35" cy="55" r="3" fill="#cbd5e1" />
+                      <circle cx="65" cy="55" r="3" fill="#cbd5e1" />
                     </svg>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Bottom Row - Three Cards */}
+              <div className="grid grid-cols-3 gap-6">
+                {/* Neural Scraping */}
+                <Card className="p-5 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 bg-white space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-indigo-600" />
+                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Neural Scraping</span>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-slate-600">API Retention</span>
+                        <span className="font-bold text-indigo-600">94%</span>
+                      </div>
+                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full w-[94%] bg-indigo-600 rounded-full" />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-slate-600">Latency</span>
+                        <span className="font-bold text-emerald-600">0.3ms</span>
+                      </div>
+                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full w-[85%] bg-emerald-500 rounded-full" />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-slate-600">Accuracy</span>
+                        <span className="font-bold text-amber-600">98.7%</span>
+                      </div>
+                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full w-[98%] bg-amber-500 rounded-full" />
+                      </div>
+                    </div>
                   </div>
                 </Card>
 
-                <Card className="p-6 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 space-y-4 bg-white">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">30D Growth</span>
-                    <TrendingUp className="w-4 h-4 text-indigo-600" />
+                {/* Latency Reduction */}
+                <Card className="p-5 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 bg-white space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-indigo-600" />
+                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Latency Reduction</span>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-4xl font-heading">+{displayCreator.kpis.viewGrowthPercent}%</p>
-                    <p className="text-[11px] font-bold text-indigo-500 flex items-center gap-1">
-                      Peak
-                    </p>
+                  
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    Edge-cached content analysis delivers sub-second response times for real-time competitor tracking.
+                  </p>
+                  
+                  <div className="flex items-center gap-2 pt-2">
+                    <Badge variant="secondary" className="bg-emerald-50 text-emerald-600 text-[9px] font-bold">
+                      -78ms avg
+                    </Badge>
                   </div>
-                  <div className="h-12 w-full mt-4 bg-indigo-50/50 rounded-lg overflow-hidden relative">
-                    <svg viewBox="0 0 100 40" className="absolute inset-0 w-full h-full">
-                      <path d="M0 35 Q 20 20, 40 25 T 80 10 T 100 5" fill="none" stroke="rgb(79 70 229)" strokeWidth="2" />
-                    </svg>
+                </Card>
+
+                {/* WindSurf Integration */}
+                <Card className="p-5 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 bg-white space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-indigo-600" />
+                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">WindSurf Integration</span>
+                  </div>
+                  
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    Native sync with Windsurf workspaces for seamless team collaboration and workflow automation.
+                  </p>
+                  
+                  <div className="flex items-center gap-2 pt-2">
+                    <Badge variant="secondary" className="bg-indigo-50 text-indigo-600 text-[9px] font-bold">
+                      Auto-sync
+                    </Badge>
                   </div>
                 </Card>
               </div>
             </div>
-
-            {/* Bottom Row Sample Cards */}
-            <div className="grid grid-cols-4 gap-4">
-              {sampleCreators.map((creator, i) => (
-                <motion.div 
-                  key={creator.channelId}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  onClick={() => onAudit(creator.channelId)}
-                  className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 hover:bg-white hover:shadow-xl hover:shadow-indigo-500/5 transition-all cursor-pointer group"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-slate-200 overflow-hidden flex-shrink-0 group-hover:grayscale-0 transition-all">
-                    <img src={creator.thumbnail} alt={creator.channelName} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[9px] font-bold text-indigo-600 uppercase tracking-widest truncate">#{i + 2} Performer</p>
-                    <p className="text-[11px] font-bold text-foreground truncate">{creator.channelName}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
       </main>
 
       {/* Footer Branding */}
