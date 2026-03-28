@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 const navItems = [
   { icon: LayoutDashboard, label: "STRATEGIC OVERVIEW", id: "strategic" },
   { icon: BarChart3, label: "INTELLIGENCE HUB", id: "intelligence" },
+  { icon: FileText, label: "REPORTS", id: "reports" },
   { icon: Archive, label: "AUDIT HISTORY", id: "history" },
 ];
 
@@ -67,15 +68,16 @@ export function Sidebar({ showExport, activeTab, onTabChange }: SidebarProps) {
         })}
       </nav>
 
-      <div className="mt-auto space-y-1 border-t border-border/40 pt-6">
+      {/* Footer Actions */}
+      <div className="mt-auto space-y-2 border-t border-border/40 pt-6 print:hidden">
         {showExport && (
           <Button 
-            onClick={handleExport}
+            onClick={() => onTabChange("reports")}
             variant="ghost" 
-            className="w-full justify-start gap-3 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 text-xs font-bold px-3 mb-2"
+            className="w-full justify-start gap-3 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-50/50 h-11 px-4 rounded-xl transition-all"
           >
             <Download className="w-4 h-4" />
-            EXPORT PDF
+            <span className="text-[10px] font-bold tracking-widest uppercase">EXPORT PDF</span>
           </Button>
         )}
         <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground text-xs font-medium px-3">

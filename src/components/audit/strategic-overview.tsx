@@ -45,9 +45,10 @@ import { calculatePerformanceRatio, calculateEngagementRate, ChannelAuditReport 
 interface StrategicOverviewProps {
   report: ChannelAuditReport;
   onVideoSelect: (video: any) => void;
+  onGenerateReport: () => void;
 }
 
-export function StrategicOverview({ report, onVideoSelect }: StrategicOverviewProps) {
+export function StrategicOverview({ report, onVideoSelect, onGenerateReport }: StrategicOverviewProps) {
   const [chartMode, setChartMode] = useState<"views" | "engagement">("views");
   const [contentType, setContentType] = useState<"all" | "long" | "shorts">("all");
   const [showIframe, setShowIframe] = useState(false);
@@ -93,12 +94,26 @@ export function StrategicOverview({ report, onVideoSelect }: StrategicOverviewPr
     { label: "SHORTS AVG VIEWS", value: (report.shorts.avgViews / 1000).toFixed(1) + "k", sub: "Avg Reach per Short", trend: "+5%", color: "emerald" },
     { label: "SHORTS AVG ENGAGEMENT", value: report.shorts.avgER.toFixed(1) + "%", sub: "Shorts Retention", trend: "Steady", color: "indigo" },
     { label: "SHORTS VOLUME", value: report.videos.filter(v => v.isShort).length.toString(), sub: "Last 50 uploads", trend: "High", color: "indigo" },
-    { label: "TOP SHORT ID", value: report.shorts.topVideoId ? "#" + report.shorts.topVideoId.slice(0, 4) : "N/A", sub: "Peak Performer", trend: "Viral", color: "emerald" },
+    { 
+      label: "TOP PERFORMING SHORT", 
+      value: report.videos.find(v => v.id === report.shorts.topVideoId)?.title || "N/A", 
+      sub: "Peak Performer", 
+      trend: "Viral", 
+      color: "emerald",
+      isTitle: true 
+    },
   ] : contentType === "long" ? [
     { label: "LONG-FORM AVG VIEWS", value: (report.longForm.avgViews / 1000).toFixed(1) + "k", sub: "Avg Reach per Video", trend: "+8%", color: "emerald" },
     { label: "LONG-FORM AVG ENGAGEMENT", value: report.longForm.avgER.toFixed(1) + "%", sub: "Video Retention", trend: "Growth", color: "indigo" },
     { label: "VIDEO VOLUME", value: report.videos.filter(v => !v.isShort).length.toString(), sub: "Last 50 uploads", trend: "Steady", color: "indigo" },
-    { label: "TOP VIDEO ID", value: report.longForm.topVideoId ? "#" + report.longForm.topVideoId.slice(0, 4) : "N/A", sub: "Peak Performer", trend: "Growth", color: "emerald" },
+    { 
+      label: "TOP PERFORMING VIDEO", 
+      value: report.videos.find(v => v.id === report.longForm.topVideoId)?.title || "N/A", 
+      sub: "Peak Performer", 
+      trend: "Growth", 
+      color: "emerald",
+      isTitle: true 
+    },
   ] : [
     { label: "TOTAL SUBSCRIBERS", value: (report.subscribers / 1000000).toFixed(1) + "M", sub: "Global Reach", trend: "+12%", color: "emerald" },
     { label: "30D VIEW VOLUME", value: (report.kpis.totalViewsLast30Days / 1000000).toFixed(1) + "M", sub: "Consolidated Playback", trend: report.kpis.viewGrowthPercent + "%", color: "emerald" },
@@ -126,7 +141,7 @@ export function StrategicOverview({ report, onVideoSelect }: StrategicOverviewPr
             <span className="text-[10px] font-bold tracking-[0.2em] text-indigo-600 uppercase">Quarterly Analysis Report</span>
             <div className="flex items-center gap-4">
               <h1 className="text-4xl font-heading text-slate-900">{report.channelName} Audit 2024</h1>
-              <div className="flex bg-slate-200/50 p-1 rounded-2xl">
+              <div className="flex bg-slate-200/50 p-1 rounded-2xl print:hidden">
                 {(["all", "long", "shorts"] as const).map((type) => (
                   <Button
                     key={type}
@@ -144,7 +159,10 @@ export function StrategicOverview({ report, onVideoSelect }: StrategicOverviewPr
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button className="bg-indigo-600 hover:bg-indigo-700 rounded-xl px-6 text-xs font-bold tracking-widest transition-all hover:scale-[1.02]">
+            <Button 
+              onClick={onGenerateReport}
+              className="bg-indigo-600 hover:bg-indigo-700 rounded-xl px-6 text-xs font-bold tracking-widest transition-all hover:scale-[1.02]"
+            >
               GENERATE REPORT
             </Button>
           </div>
@@ -167,7 +185,12 @@ export function StrategicOverview({ report, onVideoSelect }: StrategicOverviewPr
                   </Badge>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-3xl font-heading">{metric.value}</p>
+                  <p className={cn(
+                    "font-heading",
+                    metric.isTitle ? "text-sm line-clamp-2 h-10 leading-tight" : "text-3xl"
+                  )}>
+                    {metric.value}
+                  </p>
                   <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">{metric.sub}</p>
                 </div>
               </Card>

@@ -88,15 +88,34 @@ export async function getAuditData(channelId: string): Promise<ChannelAuditRepor
   const channelName = channel.snippet.title;
   const channelThumbnail = channel.snippet.thumbnails.default.url;
 
-  // 2. Get Latest Videos
+  // 2. Get Latest Videos (Combining search for reliability)
   const videosUrl = `${BASE_URL}/search?part=snippet&channelId=${channelId}&maxResults=50&order=date&type=video&key=${API_KEY}`;
   const videosRes = await fetch(videosUrl);
   if (!videosRes.ok) return null;
   const videosData = await videosRes.json();
-  const videoIds = videosData.items.map((item: any) => item.id.videoId).join(",");
+  
+  // Also check for uploads playlist to ensure we don't miss anything
+  const channelDetailsUrl = `${BASE_URL}/channels?part=contentDetails&id=${channelId}&key=${API_KEY}`;
+  const channelDetailsRes = await fetch(channelDetailsUrl);
+  let playlistVideoIds: string[] = [];
+  if (channelDetailsRes.ok) {
+    const channelDetailsData = await channelDetailsRes.json();
+    const uploadsPlaylistId = channelDetailsData.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+    if (uploadsPlaylistId) {
+      const playlistUrl = `${BASE_URL}/playlistItems?part=contentDetails&playlistId=${uploadsPlaylistId}&maxResults=50&key=${API_KEY}`;
+      const playlistRes = await fetch(playlistUrl);
+      if (playlistRes.ok) {
+        const playlistData = await playlistRes.json();
+        playlistVideoIds = playlistData.items.map((item: any) => item.contentDetails.videoId);
+      }
+    }
+  }
+
+  const searchVideoIds = videosData.items.map((item: any) => item.id.videoId);
+  const combinedVideoIds = Array.from(new Set([...searchVideoIds, ...playlistVideoIds])).slice(0, 50).join(",");
 
   // 3. Get Video Statistics
-  const statsUrl = `${BASE_URL}/videos?part=snippet,statistics,contentDetails&id=${videoIds}&key=${API_KEY}`;
+  const statsUrl = `${BASE_URL}/videos?part=snippet,statistics,contentDetails&id=${combinedVideoIds}&key=${API_KEY}`;
   const statsRes = await fetch(statsUrl);
   if (!statsRes.ok) return null;
   const statsData = await statsRes.json();

@@ -5,10 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LandingHero } from "@/components/audit/landing-hero";
 import { StrategicOverview } from "@/components/audit/strategic-overview";
 import { IntelligenceHub } from "@/components/audit/intelligence-hub";
+import { AuditReport } from "@/components/audit/audit-report";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
-import { ChannelAuditReport } from "@/lib/youtube";
+import { resolveChannelId, getAuditData, ChannelAuditReport, VideoAudit } from "@/lib/youtube";
 import { BarChart3 } from "lucide-react";
 
 export default function Home() {
@@ -91,7 +92,8 @@ export default function Home() {
   };
 
   return (
-    <main className="flex h-screen overflow-hidden bg-white">
+    <main className="flex h-screen bg-slate-50/30 overflow-hidden">
+      {/* Main Layout */}
       {hasResults && (
         <motion.div 
           initial={{ x: -260 }}
@@ -99,9 +101,9 @@ export default function Home() {
           transition={{ type: "spring", damping: 20, stiffness: 100 }}
         >
           <Sidebar 
-            showExport={hasResults} 
             activeTab={activeTab} 
             onTabChange={setActiveTab} 
+            showExport={!!currentReport}
           />
         </motion.div>
       )}
@@ -170,10 +172,17 @@ export default function Home() {
               className="absolute inset-0 flex flex-col overflow-hidden"
             >
               {activeTab === "strategic" && (
-                <StrategicOverview report={currentReport} onVideoSelect={handleVideoSelect} />
+                <StrategicOverview 
+                  report={currentReport} 
+                  onVideoSelect={handleVideoSelect} 
+                  onGenerateReport={() => setActiveTab("reports")}
+                />
               )}
               {activeTab === "intelligence" && (
                 <IntelligenceHub video={selectedVideo} report={currentReport} />
+              )}
+              {activeTab === "reports" && (
+                <AuditReport report={currentReport} />
               )}
               {activeTab === "history" && (
                 <div className="p-8 space-y-6">

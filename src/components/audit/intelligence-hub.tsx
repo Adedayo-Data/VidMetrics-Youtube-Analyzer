@@ -17,7 +17,8 @@ import {
   Lightbulb,
   CheckCircle2,
   AlertCircle,
-  LineChart as LineChartIcon
+  LineChart as LineChartIcon,
+  PieChart as PieChartIcon
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +34,11 @@ import {
   Tooltip, 
   Cell,
   ReferenceLine,
-  CartesianGrid
+  CartesianGrid,
+  PieChart,
+  Pie,
+  AreaChart,
+  Area
 } from "recharts";
 import { calculatePerformanceRatio, calculateEngagementRate, ChannelAuditReport, VideoAudit } from "@/lib/youtube";
 
@@ -176,20 +181,35 @@ export function IntelligenceHub({ video, report }: IntelligenceHubProps) {
                         </p>
                       </div>
 
-                      <div className="space-y-6">
-                        <span className="text-[10px] font-bold tracking-[0.3em] text-indigo-600 uppercase">Quality Score</span>
-                        <div className="space-y-4">
-                          <QualityCheck label="Thumbnail Appeal Score" status={performanceRatio > 10 ? "success" : "warning"} />
-                          <QualityCheck label="Audience Retention" status={engagementRate > formatAvgER ? "success" : "neutral"} />
-                          <QualityCheck label="Comment Velocity" status={activeVideo.commentCount > (activeVideo.viewCount * 0.005) ? "success" : "neutral"} />
-                        </div>
-                        <div className="pt-4 border-t border-slate-50">
-                          <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                            <span>Comment Heat</span>
-                            <span className="text-slate-900">{(activeVideo.commentCount / (activeVideo.viewCount || 1) * 1000).toFixed(2)} / 1k views</span>
+                        <div className="space-y-6">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold tracking-[0.3em] text-indigo-600 uppercase">Quality Score Breakdown</span>
+                            <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-tighter">Impact on ER Delta</Badge>
+                          </div>
+                          <div className="space-y-4">
+                            <QualityCheck 
+                              label="Thumbnail Appeal" 
+                              status={performanceRatio > 10 ? "success" : "warning"} 
+                              description="Measures click-through efficiency. High scores here suggest your visual 'hook' is strong, increasing views and potential engagement."
+                            />
+                            <QualityCheck 
+                              label="Audience Retention" 
+                              status={engagementRate > formatAvgER ? "success" : "neutral"} 
+                              description="Compares current video ER to your format average. If positive, it means viewers are staying long enough to interact."
+                            />
+                            <QualityCheck 
+                              label="Comment Velocity" 
+                              status={activeVideo.commentCount > (activeVideo.viewCount * 0.005) ? "success" : "neutral"} 
+                              description="Calculates comments per view. A higher velocity indicates more 'heat' and debate, which heavily boosts your ER Delta."
+                            />
+                          </div>
+                          <div className="pt-4 border-t border-slate-50">
+                            <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                              <span>Comment Heat</span>
+                              <span className="text-slate-900">{(activeVideo.commentCount / (activeVideo.viewCount || 1) * 1000).toFixed(2)} / 1k views</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
                     </div>
                   </Card>
                 </div>
@@ -201,6 +221,74 @@ export function IntelligenceHub({ video, report }: IntelligenceHubProps) {
                 <div className="grid grid-cols-2 gap-8">
                   <ThumbnailAnalysisCard thumbnailUrl={activeVideo.thumbnail} />
                   <TagCloudCard tags={activeVideo.tags || []} report={report} />
+                </div>
+
+                <div className="grid grid-cols-12 gap-8">
+                  <Card className="col-span-7 p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-white space-y-8">
+                    <div className="space-y-1">
+                      <h3 className="text-2xl font-heading">Engagement Distribution</h3>
+                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Interaction breakdown for this specific content</p>
+                    </div>
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={[
+                              { name: 'Likes', value: activeVideo.likeCount, fill: '#4f46e5' },
+                              { name: 'Comments', value: activeVideo.commentCount, fill: '#c7d2fe' },
+                            ]}
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="value"
+                          >
+                            <Cell key="likes" fill="#4f46e5" />
+                            <Cell key="comments" fill="#c7d2fe" />
+                          </Pie>
+                          <Tooltip 
+                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex justify-center gap-8">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-indigo-600" />
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Likes ({((activeVideo.likeCount / (activeVideo.likeCount + activeVideo.commentCount || 1)) * 100).toFixed(1)}%)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-indigo-200" />
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Comments ({((activeVideo.commentCount / (activeVideo.likeCount + activeVideo.commentCount || 1)) * 100).toFixed(1)}%)</span>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="col-span-5 p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-slate-900 text-white space-y-8">
+                    <div className="space-y-1">
+                      <h3 className="text-2xl font-heading text-white">Sentiment Proxy</h3>
+                      <p className="text-[10px] text-indigo-400 font-medium uppercase tracking-widest">Interaction intensity metrics</p>
+                    </div>
+                    <div className="space-y-12 py-4">
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">L/V Ratio</span>
+                          <span className="text-xl font-heading">{(activeVideo.likeCount / (activeVideo.viewCount || 1) * 100).toFixed(2)}%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-indigo-500" style={{ width: `${Math.min((activeVideo.likeCount / (activeVideo.viewCount || 1) * 100) * 10, 100)}%` }} />
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">C/L Ratio</span>
+                          <span className="text-xl font-heading">{(activeVideo.commentCount / (activeVideo.likeCount || 1) * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-emerald-500" style={{ width: `${Math.min((activeVideo.commentCount / (activeVideo.likeCount || 1) * 100) * 2, 100)}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
                 </div>
 
                 <Card className="p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-white space-y-8">
@@ -371,15 +459,20 @@ function MetricCard({ label, value, icon: Icon }: any) {
   );
 }
 
-function QualityCheck({ label, status }: { label: string, status: "success" | "warning" | "neutral" }) {
+function QualityCheck({ label, status, description }: { label: string, status: "success" | "warning" | "neutral", description?: string }) {
   const Icon = status === "success" ? CheckCircle2 : status === "warning" ? AlertCircle : ShieldCheck;
   const colorClass = status === "success" ? "text-emerald-500" : status === "warning" ? "text-rose-500" : "text-slate-400";
   const bgClass = status === "success" ? "bg-emerald-50" : status === "warning" ? "bg-rose-50" : "bg-slate-50";
 
   return (
-    <div className={cn("flex items-center justify-between p-3 rounded-xl", bgClass)}>
-      <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{label}</span>
-      <Icon className={cn("w-4 h-4", colorClass)} />
+    <div className={cn("p-4 rounded-xl space-y-2", bgClass)}>
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{label}</span>
+        <Icon className={cn("w-4 h-4", colorClass)} />
+      </div>
+      {description && (
+        <p className="text-[10px] text-slate-500 leading-tight font-medium">{description}</p>
+      )}
     </div>
   );
 }
