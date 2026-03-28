@@ -18,21 +18,18 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "EXECUTIVE SUMMARY", href: "/" },
-  { icon: BarChart3, label: "AUDIT LOGS", href: "/audit" },
-  { icon: FileText, label: "METRICS LIBRARY", href: "/metrics" },
-  { icon: ShieldAlert, label: "RISK ANALYSIS", href: "/risk" },
-  { icon: Users, label: "STAKEHOLDERS", href: "/stakeholders" },
-  { icon: Archive, label: "ARCHIVED REPORTS", href: "/archive" },
+  { icon: LayoutDashboard, label: "STRATEGIC OVERVIEW", id: "strategic" },
+  { icon: BarChart3, label: "INTELLIGENCE HUB", id: "intelligence" },
+  { icon: Archive, label: "AUDIT HISTORY", id: "history" },
 ];
 
 interface SidebarProps {
   showExport?: boolean;
+  activeTab: string;
+  onTabChange: (id: string) => void;
 }
 
-export function Sidebar({ showExport }: SidebarProps) {
-  const pathname = usePathname();
-
+export function Sidebar({ showExport, activeTab, onTabChange }: SidebarProps) {
   const handleExport = () => {
     window.print();
   };
@@ -48,13 +45,13 @@ export function Sidebar({ showExport }: SidebarProps) {
 
       <nav className="flex-1 space-y-1">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = activeTab === item.id;
           return (
-            <Link
-              key={item.href}
-              href={item.href}
+            <button
+              key={item.id}
+              onClick={() => onTabChange(item.id)}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors group relative",
+                "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors group relative",
                 isActive 
                   ? "text-primary bg-primary/5 font-semibold" 
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -65,7 +62,7 @@ export function Sidebar({ showExport }: SidebarProps) {
               {isActive && (
                 <div className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-primary rounded-r-full" />
               )}
-            </Link>
+            </button>
           );
         })}
       </nav>
