@@ -11,7 +11,9 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
 import { resolveChannelId, getAuditData, ChannelAuditReport, VideoAudit } from "@/lib/youtube";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, AlertCircle, X } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const [isAuditing, setIsAuditing] = useState(false);
@@ -20,6 +22,7 @@ export default function Home() {
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
   const [auditHistory, setAuditHistory] = useState<string[]>([]);
   const [currentReport, setCurrentReport] = useState<ChannelAuditReport | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [featuredCreator, setFeaturedCreator] = useState<ChannelAuditReport | null>({
     channelId: "UCBJycsmduvYELg8GaZPBnZg",
     channelName: "MKBHD",
@@ -126,6 +129,7 @@ export default function Home() {
     setIsAuditing(true);
     setHasResults(false);
     setCurrentReport(null);
+    setError(null);
     try {
       const response = await fetch("/api/audit", {
         method: "POST",
@@ -141,11 +145,11 @@ export default function Home() {
         setAuditHistory(newHistory);
         localStorage.setItem("vidmetrics_history", JSON.stringify(newHistory));
       } else {
-        alert(data.error || "Audit failed");
+        setError(data.error || "Unable to analyze this channel. Please check the URL and try again.");
       }
     } catch (error) {
       console.error("Audit failed:", error);
-      alert("Intelligence Engine Offline");
+      setError("Connection error. Please check your internet connection and try again.");
     } finally {
       setIsAuditing(false);
     }
@@ -181,6 +185,35 @@ export default function Home() {
       )}
 
       <div className="flex-1 relative flex flex-col">
+        {/* Error Banner */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute top-4 left-4 right-4 z-50"
+          >
+            <Card className="p-4 rounded-2xl border-red-200 bg-red-50 shadow-lg">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <AlertCircle className="w-4 h-4 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-red-900 text-sm">Audit Failed</h4>
+                  <p className="text-xs text-red-700 mt-1">{error}</p>
+                </div>
+                <Button
+                  onClick={() => setError(null)}
+                  variant="ghost"
+                  className="h-8 w-8 p-0 rounded-lg hover:bg-red-100"
+                >
+                  <X className="w-4 h-4 text-red-600" />
+                </Button>
+              </div>
+            </Card>
+          </motion.div>
+        )}
+
         <AnimatePresence mode="wait">
           {!hasResults && !isAuditing && (
               <LandingHero 

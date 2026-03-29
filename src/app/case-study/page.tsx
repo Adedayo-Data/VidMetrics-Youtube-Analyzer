@@ -31,7 +31,7 @@ export default function CaseStudyPage() {
           </div>
           <div className="flex items-center gap-2">
             <User className="w-4 h-4" />
-            <span>By VidMetrics Team</span>
+            <span>By Adedayo</span>
           </div>
         </div>
 
