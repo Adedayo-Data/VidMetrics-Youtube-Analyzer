@@ -4,7 +4,7 @@ import { resolveChannelId, getAuditData } from "@/lib/youtube";
 // Simple in-memory cache for demo purposes
 // In production, use Redis or a similar store
 const cache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_TTL = 1000 * 60 * 60; // 1 hour
+const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
 
 export async function POST(request: Request) {
   try {
