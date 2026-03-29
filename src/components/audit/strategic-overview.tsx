@@ -41,6 +41,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { calculatePerformanceRatio, calculateEngagementRate, ChannelAuditReport } from "@/lib/youtube";
+import { formatNumber } from "@/lib/utils";
 
 interface StrategicOverviewProps {
   report: ChannelAuditReport;
@@ -147,7 +148,7 @@ export function StrategicOverview({ report, onVideoSelect, onGenerateReport }: S
   }));
 
   const metrics = contentType === "shorts" ? [
-    { label: "SHORTS AVG VIEWS", value: (report.shorts.avgViews / 1000).toFixed(1) + "k", sub: "Avg Reach per Short", trend: "+5%", color: "emerald" },
+    { label: "SHORTS AVG VIEWS", value: formatNumber(report.shorts.avgViews), sub: "Avg Reach per Short", trend: "+5%", color: "emerald" },
     { label: "SHORTS AVG ENGAGEMENT", value: report.shorts.avgER.toFixed(1) + "%", sub: "Shorts Retention", trend: "Steady", color: "indigo" },
     { label: "SHORTS VOLUME", value: report.videos.filter(v => v.isShort).length.toString(), sub: "Last 50 uploads", trend: "High", color: "indigo" },
     { 
@@ -159,7 +160,7 @@ export function StrategicOverview({ report, onVideoSelect, onGenerateReport }: S
       isTitle: true 
     },
   ] : contentType === "long" ? [
-    { label: "LONG-FORM AVG VIEWS", value: (report.longForm.avgViews / 1000).toFixed(1) + "k", sub: "Avg Reach per Video", trend: "+8%", color: "emerald" },
+    { label: "LONG-FORM AVG VIEWS", value: formatNumber(report.longForm.avgViews), sub: "Avg Reach per Video", trend: "+8%", color: "emerald" },
     { label: "LONG-FORM AVG ENGAGEMENT", value: report.longForm.avgER.toFixed(1) + "%", sub: "Video Retention", trend: "Growth", color: "indigo" },
     { label: "VIDEO VOLUME", value: report.videos.filter(v => !v.isShort).length.toString(), sub: "Last 50 uploads", trend: "Steady", color: "indigo" },
     { 
@@ -171,8 +172,8 @@ export function StrategicOverview({ report, onVideoSelect, onGenerateReport }: S
       isTitle: true 
     },
   ] : [
-    { label: "TOTAL SUBSCRIBERS", value: (report.subscribers / 1000000).toFixed(1) + "M", sub: "Global Reach", trend: "+12%", color: "emerald" },
-    { label: "30D VIEW VOLUME", value: (report.kpis.totalViewsLast30Days / 1000000).toFixed(1) + "M", sub: "Consolidated Playback", trend: report.kpis.viewGrowthPercent + "%", color: "emerald" },
+    { label: "TOTAL SUBSCRIBERS", value: formatNumber(report.subscribers), sub: "Global Reach", trend: "+12%", color: "emerald" },
+    { label: "30D VIEW VOLUME", value: formatNumber(report.kpis.totalViewsLast30Days), sub: "Consolidated Playback", trend: report.kpis.viewGrowthPercent + "%", color: "emerald" },
     { label: "AVG ENGAGEMENT", value: report.kpis.avgEngagementRate.toFixed(1) + "%", sub: "Retention benchmark", trend: report.kpis.status, color: "indigo" },
     { label: "CONTENT VOLUME", value: report.videos.length.toString(), sub: "Recent uploads", trend: "Steady", color: "indigo" },
   ];
@@ -192,10 +193,10 @@ export function StrategicOverview({ report, onVideoSelect, onGenerateReport }: S
         className="max-w-7xl mx-auto space-y-8"
       >
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1">
             <span className="text-[10px] font-bold tracking-[0.2em] text-indigo-600 uppercase">Quarterly Analysis Report</span>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <h1 className="text-4xl font-heading text-slate-900">{report.channelName} Audit 2026</h1>
               <div className="flex bg-slate-200/50 p-1 rounded-2xl print:hidden">
                 {(["all", "long", "shorts"] as const).map((type) => (
@@ -225,7 +226,7 @@ export function StrategicOverview({ report, onVideoSelect, onGenerateReport }: S
         </div>
 
         {/* Top Metrics Grid */}
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
           {metrics.map((metric, i) => (
             <motion.div key={i} variants={item}>
               <Card className="p-6 rounded-2xl border-none shadow-sm shadow-indigo-500/5 space-y-4 bg-white">
@@ -255,9 +256,9 @@ export function StrategicOverview({ report, onVideoSelect, onGenerateReport }: S
         </div>
 
         {/* Bento Grid */}
-        <div className="grid grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Main Video Spotlight */}
-          <motion.div variants={item} className="col-span-5">
+          <motion.div variants={item} className="col-span-1 lg:col-span-5">
             <Card className="h-full rounded-[2.5rem] border-none shadow-2xl shadow-indigo-500/10 overflow-hidden flex flex-col bg-white">
               <div className="p-8 space-y-6 flex-1">
                 <div className="flex items-center justify-between">
@@ -324,7 +325,7 @@ export function StrategicOverview({ report, onVideoSelect, onGenerateReport }: S
             </Card>
           </motion.div>
 
-          <div className="col-span-7 flex flex-col gap-6">
+          <div className="col-span-1 lg:col-span-7 flex flex-col gap-6">
             {/* Performance Velocity Chart */}
             <motion.div variants={item} className="flex-1">
               <Card className="h-full rounded-[2.5rem] border-none shadow-2xl shadow-indigo-500/5 p-8 space-y-8 flex flex-col bg-white">
@@ -379,7 +380,7 @@ export function StrategicOverview({ report, onVideoSelect, onGenerateReport }: S
                         axisLine={false}
                         tickLine={false}
                         tick={{ fontSize: 10, fill: '#64748b' }}
-                        tickFormatter={(value) => value >= 1000000 ? `${(value / 1000000).toFixed(1)}M` : `${value / 1000}k`}
+                        tickFormatter={(value) => formatNumber(value)}
                       />
                       <YAxis 
                         yAxisId="right"
@@ -530,7 +531,7 @@ export function StrategicOverview({ report, onVideoSelect, onGenerateReport }: S
                           <p className="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition-colors truncate max-w-md">{row.title}</p>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right font-semibold text-slate-700">{row.viewCount >= 1000000 ? `${(row.viewCount / 1000000).toFixed(1)}M` : `${(row.viewCount / 1000).toFixed(0)}k`}</TableCell>
+                      <TableCell className="text-right font-semibold text-slate-700">{formatNumber(row.viewCount)}</TableCell>
                       <TableCell className="text-right">
                         <span className="text-indigo-600 font-bold text-lg">{row.performanceRatio.toFixed(1)}%</span>
                       </TableCell>
