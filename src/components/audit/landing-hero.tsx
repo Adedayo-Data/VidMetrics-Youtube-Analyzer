@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChannelAuditReport } from "@/lib/youtube";
+import { formatNumber } from "@/lib/utils";
+import { ChannelAuditReport, VideoAudit } from "@/lib/youtube";
 
 interface LandingHeroProps {
   featuredCreator: ChannelAuditReport | null;
@@ -148,16 +149,16 @@ export function LandingHero({ featuredCreator, sampleCreators, onAudit, isLoadin
                       Case Study
                     </Badge>
                     <h3 className="text-2xl font-heading leading-tight max-w-sm">
-                      How Brand X increased organic reach by <span className="text-indigo-600">40%</span> using Velocity Mapping.
+                      Building VidMetrics: From Idea to YouTube Analytics Platform in <span className="text-indigo-600">48 Hours</span>.
                     </h3>
                   </div>
                   <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
-                    <Star className="w-6 h-6 text-indigo-600 fill-indigo-600" />
+                    <Star className="w-6 h-6 text-indigo-600" />
                   </div>
                 </div>
 
                 <p className="text-sm text-slate-600 max-w-md leading-relaxed">
-                  By identifying competitor content gaps in real-time, Brand X optimized their publishing schedule and content mix. Read the full breakdown.
+                  A deep dive into the technical decisions, AI-assisted workflow, and lessons learned while building a competitive intelligence engine from scratch.
                 </p>
 
                 <div className="flex items-center gap-4 pt-2">
@@ -318,6 +319,13 @@ export function LandingHero({ featuredCreator, sampleCreators, onAudit, isLoadin
                     <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Smart Caching</span>
                   </div>
                   
+                  <p className="text-slate-600 leading-relaxed text-sm">
+                    This audit provides a comprehensive analysis of the <span className="font-bold text-slate-900">{displayCreator.channelName}</span> YouTube channel. 
+                    Currently, the channel commands a global reach of <span className="font-bold text-slate-900">{formatNumber(displayCreator.subscribers)} subscribers</span>. 
+                    Our intelligence shows a <span className="font-bold text-indigo-600 uppercase tracking-widest text-xs">{displayCreator.kpis.status}</span> phase, with 
+                    <span className="font-bold text-slate-900"> {formatNumber(displayCreator.kpis.totalViewsLast30Days)} views</span> generated in the last 30 days.
+                  </p>
+
                   <div className="space-y-3">
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-[11px]">
