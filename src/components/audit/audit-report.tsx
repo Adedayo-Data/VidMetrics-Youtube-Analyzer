@@ -20,6 +20,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatNumber } from "@/lib/utils";
 import { ChannelAuditReport, VideoAudit } from "@/lib/youtube";
 
 interface AuditReportProps {
@@ -117,9 +118,9 @@ export function AuditReport({ report }: AuditReportProps) {
             <div className="col-span-7 space-y-6">
               <p className="text-slate-600 leading-relaxed text-sm">
                 This audit provides a comprehensive analysis of the <span className="font-bold text-slate-900">{report.channelName}</span> YouTube channel. 
-                Currently, the channel commands a global reach of <span className="font-bold text-slate-900">{(report.subscribers / 1000000).toFixed(1)}M subscribers</span>. 
+                Currently, the channel commands a global reach of <span className="font-bold text-slate-900">{formatNumber(report.subscribers)} subscribers</span>. 
                 Our intelligence shows a <span className="font-bold text-indigo-600 uppercase tracking-widest text-xs">{report.kpis.status}</span> phase, with 
-                <span className="font-bold text-slate-900"> {report.kpis.totalViewsLast30Days.toLocaleString()} views</span> generated in the last 30 days.
+                <span className="font-bold text-slate-900"> {formatNumber(report.kpis.totalViewsLast30Days)} views</span> generated in the last 30 days.
               </p>
               <p className="text-slate-600 leading-relaxed text-sm">
                 The channel maintains an average engagement rate of <span className="font-bold text-slate-900">{report.kpis.avgEngagementRate.toFixed(2)}%</span>, 
