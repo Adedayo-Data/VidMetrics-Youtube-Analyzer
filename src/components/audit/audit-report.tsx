@@ -95,6 +95,24 @@ export function AuditReport({ report }: AuditReportProps) {
             <div className="w-2 h-8 bg-indigo-600 rounded-full" />
             <h2 className="text-2xl font-heading text-slate-900">1.0 Executive Summary</h2>
           </div>
+          
+          {/* Interpretation Guide */}
+          <Card className="p-6 rounded-2xl border-indigo-100 bg-indigo-50/30 border-none">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                <Activity className="w-5 h-5 text-indigo-600" />
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-heading text-sm text-indigo-900">How to Read This Report</h4>
+                <p className="text-xs text-indigo-700 leading-relaxed">
+                  This audit analyzes your channel's performance across multiple dimensions. <strong>Status</strong> indicates your growth trend. 
+                  <strong>Engagement Rate (ER)</strong> shows how actively viewers interact with your content. 
+                  <strong>Performance Ratio</strong> reveals if your content reaches beyond your subscriber base (viral potential).
+                </p>
+              </div>
+            </div>
+          </Card>
+
           <div className="grid grid-cols-12 gap-12">
             <div className="col-span-7 space-y-6">
               <p className="text-slate-600 leading-relaxed text-sm">
@@ -107,11 +125,42 @@ export function AuditReport({ report }: AuditReportProps) {
                 The channel maintains an average engagement rate of <span className="font-bold text-slate-900">{report.kpis.avgEngagementRate.toFixed(2)}%</span>, 
                 benchmarking within the top tier of its niche. The strategic focus has successfully shifted toward high-velocity discovery via Shorts while maintaining long-form relationship depth.
               </p>
+              
+              {/* Detailed Metric Explanations */}
+              <div className="space-y-4 pt-4">
+                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Key Metrics Explained</h4>
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="p-4 rounded-xl bg-slate-50 space-y-1">
+                    <p className="text-xs font-bold text-slate-900">Growth Status: {report.kpis.status}</p>
+                    <p className="text-[11px] text-slate-600">
+                      {report.kpis.status === 'Spiking' ? 'Your channel is experiencing rapid growth (>15% recent increase). Capitalize on this momentum with consistent uploads.' :
+                       report.kpis.status === 'Growth' ? 'Steady positive growth (5-15%). Your content strategy is working well. Maintain current approach.' :
+                       report.kpis.status === 'Decline' ? 'Viewership is trending down (<-5%). Consider refreshing content topics or optimizing thumbnails/titles.' :
+                       'Stable performance (-5% to +5%). Your channel maintains consistent viewership without significant fluctuations.'}
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-slate-50 space-y-1">
+                    <p className="text-xs font-bold text-slate-900">Engagement Rate: {report.kpis.avgEngagementRate.toFixed(2)}%</p>
+                    <p className="text-[11px] text-slate-600">
+                      {report.kpis.avgEngagementRate > 8 ? 'Excellent engagement. Your audience deeply connects with your content.' :
+                       report.kpis.avgEngagementRate > 5 ? 'Strong engagement above industry average. Continue your current approach.' :
+                       report.kpis.avgEngagementRate > 3 ? 'Average engagement. Consider adding more calls-to-action to boost interaction.' :
+                       'Below average engagement. Focus on content that sparks discussion and emotional response.'}
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-slate-50 space-y-1">
+                    <p className="text-xs font-bold text-slate-900">30-Day Views: {report.kpis.totalViewsLast30Days.toLocaleString()}</p>
+                    <p className="text-[11px] text-slate-600">
+                      Total viewership across all videos in the last 30 days. This indicates your current reach and content consumption velocity.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="col-span-5 grid grid-cols-2 gap-4">
-              <SummaryCard label="Reach Potential" value="9.4/10" color="indigo" />
-              <SummaryCard label="Retention Health" value="8.2/10" color="emerald" />
-              <SummaryCard label="Format Balance" value="Optimal" color="slate" />
+              <SummaryCard label="Reach Potential" value={`${Math.min((report.kpis.totalViewsLast30Days / report.subscribers * 10), 10).toFixed(1)}/10`} color="indigo" />
+              <SummaryCard label="Retention Health" value={`${Math.min(report.kpis.avgEngagementRate, 10).toFixed(1)}/10`} color="emerald" />
+              <SummaryCard label="Format Balance" value={report.longForm.avgViews > report.shorts.avgViews ? "Long-Heavy" : "Short-Heavy"} color="slate" />
               <SummaryCard label="Growth Velocity" value={report.kpis.status} color="indigo" />
             </div>
           </div>
@@ -123,6 +172,16 @@ export function AuditReport({ report }: AuditReportProps) {
             <div className="w-2 h-8 bg-indigo-600 rounded-full" />
             <h2 className="text-2xl font-heading text-slate-900">2.0 Format Segmentation</h2>
           </div>
+          
+          {/* Format Explanation */}
+          <Card className="p-6 rounded-2xl border-slate-100 bg-slate-50/30 border-none">
+            <p className="text-sm text-slate-600 leading-relaxed">
+              <strong>Why we separate formats:</strong> YouTube uses two completely different algorithms for Long-form and Shorts. 
+              Long-form prioritizes watch time and retention, while Shorts focus on immediate engagement and viral velocity. 
+              Averaging them would give misleading insights. Compare your performance within each format for accurate assessment.
+            </p>
+          </Card>
+
           <div className="grid grid-cols-2 gap-10">
             <div className="space-y-6">
               <Card className="p-8 border-slate-100 shadow-none bg-slate-50/30 space-y-6 rounded-[2rem]">
@@ -139,9 +198,14 @@ export function AuditReport({ report }: AuditReportProps) {
                     <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Engagement (ER)</span>
                     <span className="text-2xl font-heading text-indigo-600">{report.longForm.avgER.toFixed(2)}%</span>
                   </div>
-                  <p className="text-[11px] text-slate-500 italic leading-relaxed pt-2">
-                    Long-form content continues to be your primary relationship-building pillar, maintaining high-intent viewership and core community depth.
-                  </p>
+                  <div className="p-3 rounded-lg bg-white border border-slate-100">
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Interpretation</p>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      {report.longForm.avgER > report.kpis.avgEngagementRate ? 
+                        "Your long-form content outperforms your channel average. This is your relationship-building pillar." :
+                        "Your long-form engagement is below your channel average. Consider adding more hooks in the first 30 seconds."}
+                    </p>
+                  </div>
                 </div>
               </Card>
               
@@ -168,9 +232,14 @@ export function AuditReport({ report }: AuditReportProps) {
                     <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Engagement (ER)</span>
                     <span className="text-2xl font-heading text-emerald-600">{report.shorts.avgER.toFixed(2)}%</span>
                   </div>
-                  <p className="text-[11px] text-slate-500 italic leading-relaxed pt-2">
-                    Shorts are serving as a high-velocity discovery engine, driving {((report.shorts.avgViews / report.longForm.avgViews) || 1).toFixed(1)}x more reach per upload than long-form.
-                  </p>
+                  <div className="p-3 rounded-lg bg-white border border-slate-100">
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Interpretation</p>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      {report.shorts.avgViews > report.longForm.avgViews ? 
+                        `Shorts are driving ${(report.shorts.avgViews / report.longForm.avgViews).toFixed(1)}x more reach per upload. This is your discovery engine.` :
+                        "Your Shorts are underperforming vs long-form. Consider making first 3 seconds more attention-grabbing."}
+                    </p>
+                  </div>
                 </div>
               </Card>
 

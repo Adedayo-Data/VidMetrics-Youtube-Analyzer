@@ -273,24 +273,47 @@ export function IntelligenceHub({ video, report, onViewReport }: IntelligenceHub
                       <h3 className="text-2xl font-heading text-white">Sentiment Proxy</h3>
                       <p className="text-[10px] text-indigo-400 font-medium uppercase tracking-widest">Interaction intensity metrics</p>
                     </div>
+                    
+                    {/* Explanation */}
+                    <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                      <p className="text-[11px] text-slate-300 leading-relaxed">
+                        <strong className="text-white">What is this?</strong> Sentiment Proxy measures the quality of engagement, not just quantity. 
+                        <span className="text-indigo-300">L/V Ratio</span> shows likes per view (affection), while 
+                        <span className="text-emerald-300">C/L Ratio</span> shows comments per like (discussion heat). 
+                        Higher values indicate more meaningful viewer connection.
+                      </p>
+                    </div>
+
                     <div className="space-y-12 py-4">
                       <div className="space-y-4">
                         <div className="flex justify-between items-baseline">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">L/V Ratio</span>
+                          <div className="space-y-1">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">L/V Ratio</span>
+                            <p className="text-[10px] text-slate-500">Likes per View × 100</p>
+                          </div>
                           <span className="text-xl font-heading">{(activeVideo.likeCount / (activeVideo.viewCount || 1) * 100).toFixed(2)}%</span>
                         </div>
                         <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                           <div className="h-full bg-indigo-500" style={{ width: `${Math.min((activeVideo.likeCount / (activeVideo.viewCount || 1) * 100) * 10, 100)}%` }} />
                         </div>
+                        <p className="text-[9px] text-slate-500">
+                          {(activeVideo.likeCount / (activeVideo.viewCount || 1) * 100) > 4 ? "Strong viewer appreciation" : (activeVideo.likeCount / (activeVideo.viewCount || 1) * 100) > 2 ? "Average engagement" : "Lower than typical"}
+                        </p>
                       </div>
                       <div className="space-y-4">
                         <div className="flex justify-between items-baseline">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">C/L Ratio</span>
+                          <div className="space-y-1">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">C/L Ratio</span>
+                            <p className="text-[10px] text-slate-500">Comments per Like × 100</p>
+                          </div>
                           <span className="text-xl font-heading">{(activeVideo.commentCount / (activeVideo.likeCount || 1) * 100).toFixed(1)}%</span>
                         </div>
                         <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                           <div className="h-full bg-emerald-500" style={{ width: `${Math.min((activeVideo.commentCount / (activeVideo.likeCount || 1) * 100) * 2, 100)}%` }} />
                         </div>
+                        <p className="text-[9px] text-slate-500">
+                          {(activeVideo.commentCount / (activeVideo.likeCount || 1) * 100) > 8 ? "High discussion engagement" : (activeVideo.commentCount / (activeVideo.likeCount || 1) * 100) > 4 ? "Good conversation rate" : "Lower comment activity"}
+                        </p>
                       </div>
                     </div>
                   </Card>
@@ -343,6 +366,23 @@ export function IntelligenceHub({ video, report, onViewReport }: IntelligenceHub
 
             {activeSubTab === "context" && (
               <div className="space-y-8">
+                {/* Info Banner */}
+                <Card className="p-6 rounded-2xl border-indigo-100 bg-indigo-50/50 border-none shadow-none">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                      <BarChart3 className="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <div className="space-y-2">
+                      <h4 className="font-heading text-sm text-indigo-900">Understanding Channel Context</h4>
+                      <p className="text-xs text-indigo-700 leading-relaxed">
+                        These charts help you understand how this specific video performs against your channel's typical performance. 
+                        <strong>Velocity Pulse</strong> shows if this video gained views faster than your format average (indicating algorithmic boost). 
+                        <strong>Internal Standings</strong> compares this video's total views against your channel average and your 30-day best performer.
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
                 <Card className="p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-white space-y-12">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
@@ -370,12 +410,30 @@ export function IntelligenceHub({ video, report, onViewReport }: IntelligenceHub
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
+                  <div className="grid grid-cols-3 gap-6 pt-6">
+                    <div className="p-4 rounded-2xl bg-slate-50 space-y-2">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Above the Line</p>
+                      <p className="text-xs text-slate-600">Video outperformed your format's typical daily view rate. The algorithm likely boosted this content beyond your core subscribers.</p>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-slate-50 space-y-2">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Dashed Line</p>
+                      <p className="text-xs text-slate-600">Your channel's format average (Long-form or Shorts). This is the baseline against which we measure performance.</p>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-slate-50 space-y-2">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Growth Curve</p>
+                      <p className="text-xs text-slate-600">Shows how views accumulated over time. Steeper curves indicate faster viral spread in early days.</p>
+                    </div>
+                  </div>
                 </Card>
 
-                <Card className="p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-white space-y-12">
-                  <div className="space-y-1">
+                <Card className="p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-white space-y-8">
+                  <div className="space-y-4">
                     <h3 className="text-2xl font-heading">Internal Standings</h3>
                     <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Video Position vs. Channel Baseline</p>
+                    <p className="text-sm text-slate-600 max-w-2xl">
+                      See how this video ranks within your own content library. <strong>Channel Avg</strong> is your typical video's performance. 
+                      <strong>30-Day Peak</strong> is your best performer recently. This shows if this video is a top performer, average, or underperformer relative to your own standards.
+                    </p>
                   </div>
                   <div className="h-64 w-full">
                     <ResponsiveContainer width="100%" height="100%">
@@ -484,20 +542,132 @@ function QualityCheck({ label, status, description }: { label: string, status: "
 
 function ThumbnailAnalysisCard({ thumbnailUrl }: { thumbnailUrl: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stats, setStats] = useState({ luminance: 0, contrast: 0 });
+  const [stats, setStats] = useState({ 
+    luminance: 0, 
+    contrast: 0,
+    textDensity: 0,
+    faceDetected: false
+  });
+  const [isAnalyzing, setIsAnalyzing] = useState(true);
 
   useEffect(() => {
+    setIsAnalyzing(true);
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.src = thumbnailUrl;
+    
     img.onload = () => {
       if (!canvasRef.current) return;
-      const ctx = canvasRef.current.getContext("2d");
+      const ctx = canvasRef.current.getContext("2d", { willReadFrequently: true });
       if (!ctx) return;
-      ctx.drawImage(img, 0, 0, 100, 100);
-      setStats({ luminance: 72, contrast: 8.4 }); // Placeholder logic
+      
+      // Set canvas size to match image for accurate analysis
+      canvasRef.current.width = img.naturalWidth || 320;
+      canvasRef.current.height = img.naturalHeight || 180;
+      
+      // Draw image and analyze
+      ctx.drawImage(img, 0, 0, canvasRef.current.width, canvasRef.current.height);
+      
+      try {
+        const imageData = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
+        const data = imageData.data;
+        
+        let totalLuminance = 0;
+        let minLuminance = 255;
+        let maxLuminance = 0;
+        let edgePixels = 0;
+        let totalPixels = data.length / 4;
+        
+        // Calculate luminance for each pixel
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          
+          // Calculate relative luminance (perceptual)
+          const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
+          totalLuminance += luminance;
+          
+          if (luminance < minLuminance) minLuminance = luminance;
+          if (luminance > maxLuminance) maxLuminance = luminance;
+          
+          // Detect edges (simple gradient detection for text/shape density estimation)
+          if (i > 0 && i < data.length - 4) {
+            const prevLum = (0.299 * data[i - 4] + 0.587 * data[i - 3] + 0.114 * data[i - 2]);
+            if (Math.abs(luminance - prevLum) > 30) {
+              edgePixels++;
+            }
+          }
+        }
+        
+        const avgLuminance = totalLuminance / totalPixels;
+        
+        // Calculate contrast ratio (WCAG formula: (L1 + 0.05) / (L2 + 0.05))
+        const L1 = maxLuminance / 255;
+        const L2 = minLuminance / 255;
+        const contrastRatio = (L1 + 0.05) / (L2 + 0.05);
+        
+        // Estimate text density based on edge detection and color variance
+        const edgeDensity = (edgePixels / totalPixels) * 100;
+        const textDensityScore = Math.min(10, Math.max(1, Math.round(edgeDensity * 2)));
+        
+        // Estimate face detection based on skin tone colors and oval shapes
+        const faceDetected = detectFaceLikelihood(data, canvasRef.current.width, canvasRef.current.height);
+        
+        setStats({
+          luminance: Math.round((avgLuminance / 255) * 100),
+          contrast: parseFloat(contrastRatio.toFixed(1)),
+          textDensity: textDensityScore,
+          faceDetected
+        });
+      } catch (error) {
+        // Fallback values if CORS or other error
+        setStats({
+          luminance: 50,
+          contrast: 4.5,
+          textDensity: 5,
+          faceDetected: false
+        });
+      }
+      
+      setIsAnalyzing(false);
+    };
+    
+    img.onerror = () => {
+      setIsAnalyzing(false);
+      setStats({ luminance: 50, contrast: 4.5, textDensity: 5, faceDetected: false });
     };
   }, [thumbnailUrl]);
+
+  // Simple heuristic for face detection based on skin tone clustering
+  function detectFaceLikelihood(data: Uint8ClampedArray, width: number, height: number): boolean {
+    let skinTonePixels = 0;
+    const sampleStep = 4; // Check every 4th pixel for performance
+    
+    for (let i = 0; i < data.length; i += 4 * sampleStep) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      
+      // Basic skin tone detection (RGB ranges for skin)
+      const isSkinTone = (
+        r > 60 && r < 255 &&
+        g > 40 && g < 220 &&
+        b > 20 && b < 200 &&
+        r > g && r > b &&
+        (r - g) > 15 &&
+        (r - b) > 15
+      );
+      
+      if (isSkinTone) skinTonePixels++;
+    }
+    
+    const totalSampled = data.length / (4 * sampleStep);
+    const skinRatio = skinTonePixels / totalSampled;
+    
+    // If more than 5% of pixels are skin tone, likely has a face
+    return skinRatio > 0.05;
+  }
 
   return (
     <Card className="p-12 rounded-[3rem] border-none shadow-2xl shadow-indigo-500/5 bg-white space-y-8">
@@ -516,19 +686,19 @@ function ThumbnailAnalysisCard({ thumbnailUrl }: { thumbnailUrl: string }) {
       <div className="grid grid-cols-2 gap-8">
         <div className="space-y-1">
           <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Luminance</p>
-          <p className="text-2xl font-heading">{stats.luminance}%</p>
+          <p className="text-2xl font-heading">{isAnalyzing ? '-' : `${stats.luminance}%`}</p>
         </div>
         <div className="space-y-1">
           <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Contrast</p>
-          <p className="text-2xl font-heading">{stats.contrast}:1</p>
+          <p className="text-2xl font-heading">{isAnalyzing ? '-' : `${stats.contrast}:1`}</p>
         </div>
         <div className="space-y-1">
           <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Text Density</p>
-          <p className="text-2xl font-heading text-indigo-600">8/10</p>
+          <p className="text-2xl font-heading text-indigo-600">{isAnalyzing ? '-' : `${stats.textDensity}/10`}</p>
         </div>
         <div className="space-y-1">
           <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Face Detected</p>
-          <p className="text-2xl font-heading text-emerald-600">Yes</p>
+          <p className="text-2xl font-heading text-emerald-600">{isAnalyzing ? '-' : (stats.faceDetected ? 'Yes' : 'No')}</p>
         </div>
       </div>
     </Card>

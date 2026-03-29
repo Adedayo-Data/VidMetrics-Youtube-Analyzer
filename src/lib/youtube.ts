@@ -163,8 +163,33 @@ export async function getAuditData(channelId: string): Promise<ChannelAuditRepor
   const getTop = (arr: VideoAudit[]) => 
     arr.length ? [...arr].sort((a, b) => b.viewCount - a.viewCount)[0].id : "";
 
+  // Calculate real growth percentage by comparing recent vs older videos
+  const calculateGrowthPercent = (): number => {
+    if (processedVideos.length < 4) return 0; // Need at least 4 videos to compare
+    
+    // Sort by date (newest first)
+    const sortedVideos = [...processedVideos].sort((a, b) => 
+      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    );
+    
+    // Split into two halves: recent half vs older half
+    const halfPoint = Math.ceil(sortedVideos.length / 2);
+    const recentVideos = sortedVideos.slice(0, halfPoint);
+    const olderVideos = sortedVideos.slice(halfPoint);
+    
+    if (olderVideos.length === 0) return 0;
+    
+    const recentAvgViews = recentVideos.reduce((acc, v) => acc + v.viewCount, 0) / recentVideos.length;
+    const olderAvgViews = olderVideos.reduce((acc, v) => acc + v.viewCount, 0) / olderVideos.length;
+    
+    if (olderAvgViews === 0) return 0;
+    
+    return ((recentAvgViews - olderAvgViews) / olderAvgViews) * 100;
+  };
+
   const last30DaysViews = processedVideos.reduce((acc, v) => acc + v.viewCount, 0); 
   const avgER = processedVideos.reduce((acc, v) => acc + v.engagementRate, 0) / processedVideos.length;
+  const growthPercent = calculateGrowthPercent();
 
   return {
     channelId,
@@ -173,9 +198,9 @@ export async function getAuditData(channelId: string): Promise<ChannelAuditRepor
     thumbnail: channelThumbnail,
     kpis: {
       totalViewsLast30Days: last30DaysViews,
-      viewGrowthPercent: 12.4, 
+      viewGrowthPercent: parseFloat(growthPercent.toFixed(1)),
       avgEngagementRate: avgER,
-      status: getChannelStatus(12.4)
+      status: getChannelStatus(growthPercent)
     },
     longForm: {
       avgViews: getAvg(longFormVideos, 'viewCount'),

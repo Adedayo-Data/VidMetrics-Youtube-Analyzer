@@ -52,6 +52,12 @@ export function StrategicOverview({ report, onVideoSelect, onGenerateReport }: S
   const [chartMode, setChartMode] = useState<"views" | "engagement">("views");
   const [contentType, setContentType] = useState<"all" | "long" | "shorts">("all");
   const [showIframe, setShowIframe] = useState(false);
+  
+  // Sorting and filtering state
+  const [sortBy, setSortBy] = useState<"performanceRatio" | "viewCount" | "engagementRate" | "publishedAt">("performanceRatio");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterFormat, setFilterFormat] = useState<"all" | "shorts" | "long">("all");
 
   const container = {
     hidden: { opacity: 0 },
@@ -71,18 +77,68 @@ export function StrategicOverview({ report, onVideoSelect, onGenerateReport }: S
   const now = new Date();
   const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
 
-  const filteredVideos = report.videos
+  // Apply sorting and filtering
+  const processedVideos = report.videos
     .filter(v => {
       if (contentType === "all") return true;
       if (contentType === "long") return !v.isShort;
       if (contentType === "shorts") return v.isShort;
       return true;
     })
-    .filter(v => new Date(v.publishedAt) >= thirtyDaysAgo)
-    .sort((a, b) => b.performanceRatio - a.performanceRatio);
+    .filter(v => {
+      if (filterFormat === "all") return true;
+      if (filterFormat === "shorts") return v.isShort;
+      if (filterFormat === "long") return !v.isShort;
+      return true;
+    })
+    .filter(v => {
+      if (!searchQuery) return true;
+      return v.title.toLowerCase().includes(searchQuery.toLowerCase());
+    })
+    .sort((a, b) => {
+      const aVal = a[sortBy];
+      const bVal = b[sortBy];
+      if (sortOrder === "desc") {
+        return (bVal as number) - (aVal as number);
+      }
+      return (aVal as number) - (bVal as number);
+    });
 
-  const displayVideos = filteredVideos.length > 0 ? filteredVideos : report.videos;
+  const filteredVideos = processedVideos.filter(v => new Date(v.publishedAt) >= thirtyDaysAgo);
+  const displayVideos = filteredVideos.length > 0 ? filteredVideos : processedVideos;
   const topVideo = displayVideos[0];
+
+  // Safety check - if no videos available, show empty state
+  if (!topVideo) {
+    return (
+      <div className="flex-1 bg-slate-50/30 p-8 overflow-y-auto">
+        <motion.div 
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="max-w-7xl mx-auto space-y-8"
+        >
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold tracking-[0.2em] text-indigo-600 uppercase">Quarterly Analysis Report</span>
+              <h1 className="text-4xl font-heading text-slate-900">{report.channelName} Audit 2026</h1>
+            </div>
+          </div>
+          <Card className="p-12 rounded-[2.5rem] border-none shadow-2xl shadow-indigo-500/5 bg-white text-center space-y-6">
+            <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mx-auto">
+              <Search className="w-10 h-10 text-slate-400" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-heading text-slate-900">No Videos Found</h3>
+              <p className="text-slate-500 max-w-md mx-auto">
+                This channel doesn't have any videos matching your current filters. Try adjusting your search or format filters.
+              </p>
+            </div>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
 
   const chartData = displayVideos.slice(0, 7).reverse().map(v => ({
     name: new Date(v.publishedAt).toLocaleDateString('en-US', { weekday: 'short' }),
@@ -392,6 +448,59 @@ export function StrategicOverview({ report, onVideoSelect, onGenerateReport }: S
               <div className="space-y-1">
                 <h2 className="text-3xl font-heading">Top Performing Content</h2>
                 <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Performance metrics for recent uploads</p>
+              </div>
+            </div>
+
+            {/* Search and Filter Controls */}
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2 flex-1 min-w-[300px]">
+                <Search className="w-4 h-4 text-slate-400" />
+                <Input
+                  placeholder="Search videos..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-10 rounded-xl border-slate-200 text-sm"
+                />
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Format:</span>
+                <div className="flex bg-slate-100 p-1 rounded-xl">
+                  {(["all", "shorts", "long"] as const).map((format) => (
+                    <Button
+                      key={format}
+                      onClick={() => setFilterFormat(format)}
+                      variant="ghost"
+                      className={cn(
+                        "h-8 px-4 rounded-lg text-[10px] font-bold tracking-widest transition-all",
+                        filterFormat === format ? "bg-white shadow-sm text-indigo-600" : "text-muted-foreground"
+                      )}
+                    >
+                      {format.toUpperCase()}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Sort:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="h-8 px-3 rounded-lg border border-slate-200 text-[10px] font-bold uppercase tracking-wider bg-white"
+                >
+                  <option value="performanceRatio">Performance</option>
+                  <option value="viewCount">Views</option>
+                  <option value="engagementRate">Engagement</option>
+                  <option value="publishedAt">Date</option>
+                </select>
+                <Button
+                  onClick={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
+                  variant="outline"
+                  className="h-8 px-3 rounded-lg border-slate-200"
+                >
+                  {sortOrder === "desc" ? <ArrowDownRight className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
+                </Button>
               </div>
             </div>
 
