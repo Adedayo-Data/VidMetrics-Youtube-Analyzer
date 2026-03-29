@@ -247,24 +247,29 @@ export function LandingHero({ featuredCreator, sampleCreators, onAudit, isLoadin
 
               <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100">
                 <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Efficiency</p>
-                  <p className="text-xl font-heading">0.821</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Engagement Rate</p>
+                  <p className="text-xl font-heading">8.2%</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">CDR Demand</p>
-                  <p className="text-xl font-heading">1.64%</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Outlier Videos</p>
+                  <p className="text-xl font-heading">12</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">VPL/ACT</p>
-                  <p className="text-xl font-heading">High</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Format Split</p>
+                  <p className="text-xl font-heading">70/30</p>
                 </div>
               </div>
             </Card>
 
             {/* Right Side Stack */}
             <div className="col-span-7 space-y-6">
-              {/* Competitor Nodes */}
-              <Card className="p-6 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 bg-white">
+              {/* Competitor Nodes - Coming Soon */}
+              <Card className="p-6 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 bg-white relative overflow-hidden">
+                <div className="absolute top-4 right-4">
+                  <Badge variant="secondary" className="bg-amber-50 text-amber-600 text-[9px] font-bold">
+                    Coming Soon
+                  </Badge>
+                </div>
                 <div className="flex items-start justify-between">
                   <div className="space-y-4 flex-1">
                     <div className="flex items-center gap-3">
@@ -277,12 +282,12 @@ export function LandingHero({ featuredCreator, sampleCreators, onAudit, isLoadin
                       </div>
                     </div>
                     <p className="text-sm text-slate-600 max-w-sm">
-                      Mapping 12,400+ interconnected data points across your competitive landscape to reveal hidden patterns.
+                      Map competitive networks and identify content gaps. Track multiple channels simultaneously to reveal strategic opportunities.
                     </p>
                   </div>
                   
                   {/* Network Visualization */}
-                  <div className="w-32 h-24 relative">
+                  <div className="w-32 h-24 relative opacity-50">
                     <svg viewBox="0 0 100 80" className="w-full h-full">
                       {/* Connection lines */}
                       <line x1="20" y1="25" x2="50" y2="40" stroke="#cbd5e1" strokeWidth="1" />
@@ -306,17 +311,17 @@ export function LandingHero({ featuredCreator, sampleCreators, onAudit, isLoadin
 
               {/* Bottom Row - Three Cards */}
               <div className="grid grid-cols-3 gap-6">
-                {/* Neural Scraping */}
+                {/* Smart Caching */}
                 <Card className="p-5 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 bg-white space-y-4">
                   <div className="flex items-center gap-2">
                     <Activity className="w-4 h-4 text-indigo-600" />
-                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Neural Scraping</span>
+                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Smart Caching</span>
                   </div>
                   
                   <div className="space-y-3">
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-slate-600">API Retention</span>
+                        <span className="text-slate-600">Cache Hit Rate</span>
                         <span className="font-bold text-indigo-600">94%</span>
                       </div>
                       <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -325,8 +330,8 @@ export function LandingHero({ featuredCreator, sampleCreators, onAudit, isLoadin
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-slate-600">Latency</span>
-                        <span className="font-bold text-emerald-600">0.3ms</span>
+                        <span className="text-slate-600">Response Time</span>
+                        <span className="font-bold text-emerald-600">~300ms</span>
                       </div>
                       <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                         <div className="h-full w-[85%] bg-emerald-500 rounded-full" />
@@ -334,8 +339,8 @@ export function LandingHero({ featuredCreator, sampleCreators, onAudit, isLoadin
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-slate-600">Accuracy</span>
-                        <span className="font-bold text-amber-600">98.7%</span>
+                        <span className="text-slate-600">Data Freshness</span>
+                        <span className="font-bold text-amber-600">24h TTL</span>
                       </div>
                       <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                         <div className="h-full w-[98%] bg-amber-500 rounded-full" />
@@ -344,38 +349,43 @@ export function LandingHero({ featuredCreator, sampleCreators, onAudit, isLoadin
                   </div>
                 </Card>
 
-                {/* Latency Reduction */}
+                {/* Fast Audit */}
                 <Card className="p-5 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 bg-white space-y-3">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-indigo-600" />
-                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Latency Reduction</span>
+                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Fast Audits</span>
                   </div>
                   
                   <p className="text-[11px] text-slate-600 leading-relaxed">
-                    Edge-cached content analysis delivers sub-second response times for real-time competitor tracking.
+                    Cached channel data delivers sub-second responses for previously audited channels. Fresh data fetched on-demand for new queries.
                   </p>
                   
                   <div className="flex items-center gap-2 pt-2">
                     <Badge variant="secondary" className="bg-emerald-50 text-emerald-600 text-[9px] font-bold">
-                      -78ms avg
+                      24h Cache
                     </Badge>
                   </div>
                 </Card>
 
-                {/* WindSurf Integration */}
-                <Card className="p-5 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 bg-white space-y-3">
+                {/* Agentic AI Integration - Coming Soon */}
+                <Card className="p-5 rounded-3xl border-slate-100 shadow-xl shadow-indigo-500/5 bg-white space-y-3 relative overflow-hidden">
+                  <div className="absolute top-3 right-3">
+                    <Badge variant="secondary" className="bg-amber-50 text-amber-600 text-[9px] font-bold">
+                      Coming Soon
+                    </Badge>
+                  </div>
                   <div className="flex items-center gap-2">
                     <Layers className="w-4 h-4 text-indigo-600" />
-                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">WindSurf Integration</span>
+                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Agentic AI</span>
                   </div>
                   
                   <p className="text-[11px] text-slate-600 leading-relaxed">
-                    Native sync with Windsurf workspaces for seamless team collaboration and workflow automation.
+                    AI-powered audit agents that autonomously analyze channels, generate reports, and provide strategic recommendations without manual intervention.
                   </p>
                   
                   <div className="flex items-center gap-2 pt-2">
                     <Badge variant="secondary" className="bg-indigo-50 text-indigo-600 text-[9px] font-bold">
-                      Auto-sync
+                      Auto-Analysis
                     </Badge>
                   </div>
                 </Card>

@@ -12,7 +12,9 @@ import {
   HelpCircle, 
   LogOut,
   ChevronRight,
-  Download
+  Download,
+  ArrowLeft,
+  Search
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -47,6 +49,16 @@ export function Sidebar({ showExport, activeTab, onTabChange, onBackHome }: Side
         </h1>
         <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-widest">Global Audit v2.4</p>
       </div>
+
+      {/* New Search Button - Prominent */}
+      <Button
+        onClick={onBackHome}
+        variant="outline"
+        className="mb-6 w-full justify-start gap-3 border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 h-12 px-4 rounded-xl transition-all font-medium"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span className="text-xs font-bold tracking-widest uppercase">NEW SEARCH</span>
+      </Button>
 
       <nav className="flex-1 space-y-1">
         {navItems.map((item) => {
